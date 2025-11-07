@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "esbuild index.tsx --bundle --outfile=dist/index.js --define:process.env.API_KEY='\"$API_KEY\"' --define:process.env.NODE_ENV='\"production\"' && cp index.html dist/index.html"
+    "build": "esbuild index.tsx --bundle --outfile=dist/index.js --define:process.env.API_KEY=\"'$API_KEY'\" --define:process.env.NODE_ENV='\"production\"' && cp index.html dist/index.html"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",
