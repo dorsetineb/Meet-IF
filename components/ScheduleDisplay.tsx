@@ -62,7 +62,7 @@ const WeekView: React.FC<{ meetings: Meeting[] }> = ({ meetings }) => {
       <div className="grid grid-cols-1 md:grid-cols-5">
         {weekDays.map((day, index) => (
           <div key={day} className={`p-4 ${index < weekDays.length - 1 ? 'border-b md:border-b-0 md:border-r border-slate-200' : ''}`}>
-            <h3 className="font-bold text-center text-gray-700 border-b border-slate-200 pb-2 mb-4 text-sm">{day}</h3>
+            <h3 className="font-bold text-center text-gray-700 pb-2 mb-4 text-sm">{day}</h3>
             <div className="space-y-3 min-h-[10rem]">
               {(meetingsByDay[day] && meetingsByDay[day]!.length > 0) ? (
                 meetingsByDay[day]!.map(meeting => (
