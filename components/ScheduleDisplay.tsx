@@ -78,8 +78,45 @@ const WeekView: React.FC<{ meetings: Meeting[] }> = ({ meetings }) => {
 
 
 export const ScheduleDisplay: React.FC<ScheduleDisplayProps> = ({ schedule, isLoading, error, frequency }) => {
+  // RULE OF HOOKS: All hooks must be called at the top level, before any conditional returns.
   const [activeWeek, setActiveWeek] = useState(1);
 
+  const meetingsByWeek = useMemo(() => {
+    if (!schedule || schedule.length === 0) {
+      return {};
+    }
+
+    const sortedSchedule = [...schedule].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    
+    // This check is crucial. If schedule is empty, accessing sortedSchedule[0] would crash.
+    if (sortedSchedule.length === 0) {
+        return {};
+    }
+
+    const firstDate = new Date(`${sortedSchedule[0].date}T00:00:00`);
+
+    const startOfWeek1 = new Date(firstDate);
+    const dayOfWeek = startOfWeek1.getDay(); // Sunday = 0, Monday = 1
+    const diff = startOfWeek1.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+    startOfWeek1.setDate(diff);
+    startOfWeek1.setHours(0, 0, 0, 0);
+
+    const grouped: { [week: number]: Meeting[] } = {};
+    for (const meeting of schedule) {
+        const meetingDate = new Date(`${meeting.date}T00:00:00`);
+        const diffTime = meetingDate.getTime() - startOfWeek1.getTime();
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        const weekNumber = Math.floor(diffDays / 7) + 1;
+        
+        if (!grouped[weekNumber]) {
+            grouped[weekNumber] = [];
+        }
+        grouped[weekNumber].push(meeting);
+    }
+    return grouped;
+  }, [schedule]);
+
+  // Conditional rendering can now happen safely after all hooks have been called.
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -103,33 +140,6 @@ export const ScheduleDisplay: React.FC<ScheduleDisplayProps> = ({ schedule, isLo
       </div>
     );
   }
-
-  const meetingsByWeek = useMemo(() => {
-    if (!schedule || schedule.length === 0) return {};
-
-    const sortedSchedule = [...schedule].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    const firstDate = new Date(`${sortedSchedule[0].date}T00:00:00`);
-
-    const startOfWeek1 = new Date(firstDate);
-    const dayOfWeek = startOfWeek1.getDay(); // Sunday = 0, Monday = 1
-    const diff = startOfWeek1.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
-    startOfWeek1.setDate(diff);
-    startOfWeek1.setHours(0, 0, 0, 0);
-
-    const grouped: { [week: number]: Meeting[] } = {};
-    for (const meeting of schedule) {
-        const meetingDate = new Date(`${meeting.date}T00:00:00`);
-        const diffTime = meetingDate.getTime() - startOfWeek1.getTime();
-        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-        const weekNumber = Math.floor(diffDays / 7) + 1;
-        
-        if (!grouped[weekNumber]) {
-            grouped[weekNumber] = [];
-        }
-        grouped[weekNumber].push(meeting);
-    }
-    return grouped;
-  }, [schedule]);
 
   if (schedule.length === 0) {
     return (
