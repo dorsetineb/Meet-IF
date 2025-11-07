@@ -107,18 +107,39 @@ export const generateSchedule = async (settings: GeneralSettings, teams: Team[])
         throw new Error("A IA retornou um formato de dados inesperado.");
     }
 
+    const timeRegex = /^\d{2}:\d{2}$/;
+
     const validatedSchedule = schedule.filter(meeting => {
         if (!meeting || typeof meeting.date !== 'string') {
             console.warn('Filtrando reunião com data ausente ou inválida:', meeting);
             return false;
         }
+
         const d = new Date(meeting.date);
         if (isNaN(d.getTime())) {
             console.warn('Filtrando reunião com data que não pode ser parseada:', meeting);
             return false;
         }
+        
+        if (typeof meeting.startTime !== 'string' || !timeRegex.test(meeting.startTime)) {
+            console.warn('Filtrando reunião com startTime ausente ou inválido:', meeting);
+            return false;
+        }
+        
+        if (typeof meeting.endTime !== 'string' || !timeRegex.test(meeting.endTime)) {
+            console.warn('Filtrando reunião com endTime ausente ou inválido:', meeting);
+            return false;
+        }
+        
+        const startDateTime = new Date(`${meeting.date}T${meeting.startTime}`);
+        if (isNaN(startDateTime.getTime())) {
+            console.warn('Filtrando reunião com combinação de data/hora de início inválida:', meeting);
+            return false;
+        }
+
         return true;
     });
+
 
     return validatedSchedule;
   } catch (error) {
