@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import type { Meeting, DayOfWeek } from '../types';
 import { CalendarIcon } from './icons/CalendarIcon';
@@ -11,19 +10,20 @@ interface ScheduleDisplayProps {
 }
 
 const CalendarMeetingCard: React.FC<{ meeting: Meeting }> = ({ meeting }) => (
-  <div className="bg-white rounded-lg p-3 shadow border border-gray-200 space-y-2 transition-transform hover:scale-105 duration-200">
-    <p className="font-bold text-sm text-primary-800">{meeting.title}</p>
-    <p className="text-xs font-medium text-gray-500">{meeting.teamName}</p>
-    <div className="flex items-center text-xs text-gray-600">
-      <ClockIcon className="w-3 h-3 mr-1.5" />
-      <span>{meeting.startTime} - {meeting.endTime}</span>
+  <div className="bg-white rounded-lg p-3 shadow border border-gray-200 flex flex-col justify-between transition-transform hover:scale-105 duration-200">
+    <div>
+      <p className="font-bold text-sm text-primary-800 truncate">{meeting.title}</p>
+      <div className="border-t pt-2 mt-2">
+         <ul className="text-xs text-gray-600 space-y-1">
+            {meeting.participantsInfo.map((p, index) => (
+              <li key={index} className="truncate">{p.participantName} ({p.topicsCount} {p.topicsCount > 1 ? 'pautas' : 'pauta'})</li>
+            ))}
+          </ul>
+      </div>
     </div>
-    <div className="border-t pt-2 mt-2">
-       <ul className="text-xs text-gray-600 space-y-1">
-          {meeting.participantsInfo.map((p, index) => (
-            <li key={index} className="truncate">{p.participantName} ({p.topicsCount} {p.topicsCount > 1 ? 'pautas' : 'pauta'})</li>
-          ))}
-        </ul>
+    <div className="mt-3 bg-gray-100 rounded-md py-1 px-2 flex items-center justify-center">
+      <ClockIcon className="w-3 h-3 mr-1.5 text-gray-600" />
+      <span className="text-xs font-semibold text-gray-700">{meeting.startTime} - {meeting.endTime}</span>
     </div>
   </div>
 );

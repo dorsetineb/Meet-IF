@@ -32,7 +32,7 @@ const buildPrompt = (settings: GeneralSettings, teams: Team[]): string => {
       1. Para cada equipe, verifique o número total de pautas.
       2. Calcule o número de reuniões necessárias para cada equipe dividindo o total de pautas pelo "Máximo de pautas por reunião" e arredondando para cima. Distribua as pautas o mais uniformemente possível entre as reuniões necessárias. Por exemplo, se uma equipe tem 10 pautas e o máximo é 8, o ideal é criar duas reuniões com 5 pautas cada.
       3. Ao atribuir pautas, priorize manter todas as pautas de um mesmo participante dentro da mesma reunião, a menos que seja impossível devido ao limite de pautas.
-      4. Ao dividir reuniões, adicione um sufixo ao título para diferenciá-las (ex: "Sincronização - Equipe Alpha (1/2)" e "Sincronização - Equipe Alpha (2/2)").
+      4. O título da reunião deve ser o nome da equipe. Se uma equipe precisar de múltiplas reuniões, adicione um sufixo numérico para diferenciá-las (ex: "Equipe Alpha (1/2)" e "Equipe Alpha (2/2)"). Não adicione prefixos como "Sincronização".
       5. **REGRA DE ESPAÇAMENTO OBRIGATÓRIA (MUITO IMPORTANTE):** Se uma equipe tiver múltiplas reuniões (ex: Reunião A (1/2) e Reunião A (2/2)), essas reuniões NUNCA devem ocorrer no mesmo dia.
          - A prioridade máxima é agendá-las em dias diferentes.
          - Se o agendamento for quinzenal ou mensal, a prioridade é agendá-las em semanas diferentes.
