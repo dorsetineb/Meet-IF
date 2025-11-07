@@ -14,12 +14,12 @@ interface ScheduleDisplayProps {
 const CalendarMeetingCard: React.FC<{ meeting: Meeting }> = ({ meeting }) => (
   <div className="bg-white rounded-lg p-3 shadow border border-gray-200 flex flex-col justify-between transition-transform hover:scale-105 duration-200">
     <div>
-      <p className="font-bold text-sm text-primary-800 truncate">{meeting.title}</p>
+      <p className="font-bold text-xs text-primary-800 truncate">{meeting.title}</p>
       <div className="border-t pt-2 mt-2">
          <ul className="space-y-2">
             {meeting.participantsInfo.map((p, index) => (
               <li key={index}>
-                <p className="text-xs font-medium text-gray-800 truncate">{p.participantName}</p>
+                <p className="text-[11px] font-medium text-gray-800 truncate">{p.participantName}</p>
                 <p className="text-[11px] text-gray-500">{p.topicsCount} {p.topicsCount > 1 ? 'pautas' : 'pauta'}</p>
               </li>
             ))}
@@ -28,7 +28,7 @@ const CalendarMeetingCard: React.FC<{ meeting: Meeting }> = ({ meeting }) => (
     </div>
     <div className="mt-3 bg-gray-100 rounded-md py-1 px-2 flex items-center justify-center">
       <ClockIcon className="w-3 h-3 mr-1.5 text-gray-600" />
-      <span className="text-xs font-semibold text-gray-700">{meeting.startTime} - {meeting.endTime}</span>
+      <span className="text-[11px] font-semibold text-gray-700">{meeting.startTime} - {meeting.endTime}</span>
     </div>
   </div>
 );
@@ -62,14 +62,14 @@ const WeekView: React.FC<{ meetings: Meeting[] }> = ({ meetings }) => {
       <div className="grid grid-cols-1 md:grid-cols-5">
         {weekDays.map((day, index) => (
           <div key={day} className={`p-4 ${index < weekDays.length - 1 ? 'border-b md:border-b-0 md:border-r border-slate-200' : ''}`}>
-            <h3 className="font-bold text-center text-gray-700 border-b border-slate-200 pb-2 mb-4">{day}</h3>
+            <h3 className="font-bold text-center text-gray-700 border-b border-slate-200 pb-2 mb-4 text-sm">{day}</h3>
             <div className="space-y-3 min-h-[10rem]">
               {(meetingsByDay[day] && meetingsByDay[day]!.length > 0) ? (
                 meetingsByDay[day]!.map(meeting => (
                   <CalendarMeetingCard key={meeting.id} meeting={meeting} />
                 ))
               ) : (
-                <div className="flex items-center justify-center h-full text-center text-sm text-gray-400 pt-8">
+                <div className="flex items-center justify-center h-full text-center text-xs text-gray-400 pt-8">
                   <p>Nenhuma reunião.</p>
                 </div>
               )}
@@ -130,8 +130,8 @@ export const ScheduleDisplay: React.FC<ScheduleDisplayProps> = ({ schedule, isLo
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          <p className="mt-4 text-lg font-semibold text-gray-700">Gerando agenda, por favor aguarde...</p>
-          <p className="text-gray-500">A IA está organizando as reuniões para todas as equipes.</p>
+          <p className="mt-4 text-base font-semibold text-gray-700">Gerando agenda, por favor aguarde...</p>
+          <p className="text-sm text-gray-500">A IA está organizando as reuniões para todas as equipes.</p>
         </div>
       </div>
     );
@@ -139,7 +139,7 @@ export const ScheduleDisplay: React.FC<ScheduleDisplayProps> = ({ schedule, isLo
 
   if (error) {
     return (
-      <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md" role="alert">
+      <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md text-sm" role="alert">
         <p className="font-bold">Erro!</p>
         <p>{error}</p>
       </div>
@@ -173,7 +173,7 @@ export const ScheduleDisplay: React.FC<ScheduleDisplayProps> = ({ schedule, isLo
                             activeWeek === weekNum
                             ? 'bg-primary-600 text-white shadow'
                             : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        } whitespace-nowrap py-2 px-4 rounded-md font-medium text-sm transition-colors duration-200`}
+                        } whitespace-nowrap py-2 px-4 rounded-md font-medium text-xs transition-colors duration-200`}
                     >
                         Semana {weekNum}
                     </button>

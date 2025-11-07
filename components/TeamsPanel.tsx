@@ -26,8 +26,8 @@ const TeamCard: React.FC<{team: Team, onEdit: (team: Team) => void, onDelete: (i
             className="group relative bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex justify-between items-center cursor-pointer transition-all duration-200 hover:shadow-md hover:border-primary-300"
         >
             <div>
-                <p className="font-bold text-primary-800">{team.name}</p>
-                <p className="text-sm text-gray-500">{totalTopics} pautas</p>
+                <p className="font-bold text-primary-800 text-sm">{team.name}</p>
+                <p className="text-xs text-gray-500">{totalTopics} pautas</p>
             </div>
             <div className="absolute top-0 right-0 h-full flex items-center pr-2">
                  <button 
@@ -46,7 +46,7 @@ export const TeamsPanel: React.FC<TeamsPanelProps> = ({ teams, onAddNewTeam, onE
     return (
         <div className="bg-white p-6 md:p-8 rounded-xl h-full">
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">Equipes</h2>
+                <h2 className="text-xl font-bold text-gray-800">Equipes</h2>
                 <button 
                     onClick={onAddNewTeam} 
                     className="p-2 text-white bg-primary-600 rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"

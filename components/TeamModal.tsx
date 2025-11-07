@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import type { Team, Participant } from '../types';
 import { PlusIcon } from './icons/PlusIcon';
@@ -74,7 +75,7 @@ export const TeamModal: React.FC<TeamModalProps> = ({ team, onSave, onClose }) =
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-4" aria-modal="true" role="dialog">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col">
         <div className="flex justify-between items-center p-5 border-b">
-            <h2 className="text-xl font-bold text-gray-800">{team ? 'Editar Equipe' : 'Adicionar Nova Equipe'}</h2>
+            <h2 className="text-lg font-bold text-gray-800">{team ? 'Editar Equipe' : 'Adicionar Nova Equipe'}</h2>
             <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100">
                 <XIcon className="w-6 h-6" />
             </button>
@@ -82,19 +83,19 @@ export const TeamModal: React.FC<TeamModalProps> = ({ team, onSave, onClose }) =
         
         <div className="p-6 space-y-6 overflow-y-auto">
             <div>
-                <label htmlFor="teamName" className="block text-sm font-medium text-gray-700">Nome da Equipe</label>
+                <label htmlFor="teamName" className="block text-xs font-medium text-gray-700">Nome da Equipe</label>
                 <input
                     type="text"
                     id="teamName"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                    className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-sm"
                     placeholder="Ex: Equipe de Marketing"
                 />
             </div>
 
             <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-2">Participantes e Pautas</h3>
+                <h3 className="text-xs font-medium text-gray-700 mb-2">Participantes e Pautas</h3>
                 <div className="space-y-3">
                     {participants.map((p, index) => (
                         <div key={p.id} className="grid grid-cols-12 gap-2 items-center">
@@ -103,7 +104,7 @@ export const TeamModal: React.FC<TeamModalProps> = ({ team, onSave, onClose }) =
                                 placeholder={`Participante ${index + 1}`}
                                 value={p.name}
                                 onChange={(e) => handleParticipantChange(index, 'name', e.target.value)}
-                                className="col-span-7 mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                                className="col-span-7 mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-xs"
                             />
                              <input
                                 type="number"
@@ -111,7 +112,7 @@ export const TeamModal: React.FC<TeamModalProps> = ({ team, onSave, onClose }) =
                                 value={isNaN(p.topicsCount) ? '' : p.topicsCount}
                                 min="1"
                                 onChange={(e) => handleParticipantChange(index, 'topicsCount', e.target.value)}
-                                className="col-span-3 mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                                className="col-span-3 mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-xs"
                             />
                             <div className="col-span-2 flex justify-end">
                                 <button
@@ -125,19 +126,19 @@ export const TeamModal: React.FC<TeamModalProps> = ({ team, onSave, onClose }) =
                         </div>
                     ))}
                 </div>
-                <button onClick={addParticipant} className="mt-4 flex items-center gap-2 text-sm font-medium text-primary-600 hover:text-primary-800">
+                <button onClick={addParticipant} className="mt-4 flex items-center gap-2 text-xs font-medium text-primary-600 hover:text-primary-800">
                     <PlusIcon className="w-5 h-5" />
                     Adicionar Participante
                 </button>
             </div>
-            {error && <p className="text-sm text-red-600">{error}</p>}
+            {error && <p className="text-xs text-red-600">{error}</p>}
         </div>
 
         <div className="flex justify-end items-center p-5 border-t bg-gray-50 rounded-b-xl">
-            <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 mr-3">
+            <button onClick={onClose} className="px-4 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 mr-3">
                 Cancelar
             </button>
-            <button onClick={handleSave} className="px-6 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700">
+            <button onClick={handleSave} className="px-6 py-2 text-xs font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700">
                 Salvar
             </button>
         </div>
