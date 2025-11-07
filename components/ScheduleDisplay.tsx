@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { Meeting, DayOfWeek, Frequency } from '../types';
 import { CalendarIcon } from './icons/CalendarIcon';
 import { ClockIcon } from './icons/ClockIcon';
@@ -77,6 +77,8 @@ const WeekView: React.FC<{ meetings: Meeting[] }> = ({ meetings }) => {
 
 
 export const ScheduleDisplay: React.FC<ScheduleDisplayProps> = ({ schedule, isLoading, error, frequency }) => {
+  const [activeWeek, setActiveWeek] = useState(1);
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -140,21 +142,37 @@ export const ScheduleDisplay: React.FC<ScheduleDisplayProps> = ({ schedule, isLo
 
   const numWeeks = frequency === 'mensal' ? 4 : (frequency === 'quinzenal' ? 2 : 1);
   const weekNumbers = Array.from({ length: numWeeks }, (_, i) => i + 1);
+  const showTabs = frequency !== 'semanal';
 
   return (
-    <div className="space-y-8">
-      <h2 className="text-3xl font-bold text-gray-800 text-center">Agenda Proposta</h2>
-      {weekNumbers.map(weekNum => {
-        const weekMeetings = meetingsByWeek[weekNum] || [];
-        return (
-          <div key={weekNum} className="space-y-4">
-            {frequency !== 'semanal' && (
-              <h3 className="text-xl font-semibold text-gray-700 pl-2 border-b-2 pb-2">Semana {weekNum}</h3>
-            )}
-            <WeekView meetings={weekMeetings} />
-          </div>
-        );
-      })}
+    <div className="space-y-6">
+      {showTabs && (
+        <div className="border-b border-gray-200">
+            <nav className="-mb-px flex space-x-6" aria-label="Tabs">
+                {weekNumbers.map(weekNum => (
+                     <button
+                        key={weekNum}
+                        onClick={() => setActiveWeek(weekNum)}
+                        className={`${
+                            activeWeek === weekNum
+                            ? 'border-primary-500 text-primary-600'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                        } whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors duration-200`}
+                    >
+                        Semana {weekNum}
+                    </button>
+                ))}
+            </nav>
+        </div>
+      )}
+
+      <div>
+        {showTabs ? (
+            <WeekView meetings={meetingsByWeek[activeWeek] || []} />
+        ) : (
+            <WeekView meetings={meetingsByWeek[1] || []} />
+        )}
+      </div>
     </div>
   );
 };

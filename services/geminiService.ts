@@ -38,7 +38,10 @@ const buildPrompt = (settings: GeneralSettings, teams: Team[]): string => {
          - Se o agendamento for quinzenal ou mensal, a prioridade é agendá-las em semanas diferentes.
          - Esta regra é mais importante do que tentar agrupar todas as reuniões o mais cedo possível. Distribua-as para garantir o espaçamento.
       6. Calcule a duração de cada reunião individualmente com base no número de pautas atribuídas a ela.
-      7. Agende TODAS as reuniões resultantes, distribuindo-as de forma equilibrada ao longo dos dias e horários permitidos DENTRO DO PERÍODO DE AGENDAMENTO DEFINIDO PELA FREQUÊNCIA. Se a frequência for 'quinzenal', distribua o total de reuniões de forma equilibrada entre as duas semanas. Se for 'mensal', distribua entre as quatro semanas. Esta distribuição equilibrada é crucial.
+      7. **DISTRIBUIÇÃO EQUILIBRADA (REGRA CRÍTICA E OBRIGATÓRIA):** A distribuição das reuniões deve ser o mais equilibrada possível em todos os níveis. Esta é a prioridade máxima do agendamento.
+         - **Entre Semanas:** Calcule o número total de reuniões a serem agendadas. Divida esse total pelo número de semanas no período (1 para semanal, 2 para quinzenal, 4 para mensal). O resultado é a meta de reuniões por semana. Por exemplo, 11 reuniões em um período quinzenal devem resultar em 5 ou 6 reuniões na Semana 1 e 5 ou 6 na Semana 2. É INACEITÁVEL agendar 9 reuniões na primeira semana e 2 na segunda.
+         - **Entre Dias da Semana:** Dentro de cada semana, distribua as reuniões de forma equilibrada entre os dias disponíveis. Evite concentrar todas as reuniões no início da semana (ex: Segunda e Terça). Utilize todos os dias permitidos.
+         - **Dentro do Dia:** Para os dias que tiverem mais de uma reunião, tente agendar uma pela manhã e outra à tarde, se possível, para não sobrecarregar um período do dia.
       8. Respeite a frequência, os dias da semana e a janela de horários para TODAS as reuniões.
       9. Assegure que haja o intervalo mínimo especificado entre reuniões e NUNCA agende nada durante o intervalo de almoço.
       10. A data deve ser no formato AAAA-MM-DD e o horário no formato HH:mm.
