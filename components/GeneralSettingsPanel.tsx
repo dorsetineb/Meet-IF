@@ -114,9 +114,50 @@ export const GeneralSettingsPanel: React.FC<GeneralSettingsPanelProps> = ({ sett
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                    <InputField id="maxTopicsPerMeeting" label="Máximo de pautas por reunião" type="number" value={settings.maxTopicsPerMeeting} onChange={handleChange} min="1" />
-                    <InputField id="topicDuration" label="Duração média das pautas" type="number" value={settings.topicDuration} onChange={handleChange} min="5" step="5" />
-                    <InputField id="breakInterval" label="Intervalo entre reuniões" type="number" value={settings.breakInterval} onChange={handleChange} min="0" step="5" />
+                    <div>
+                        <label htmlFor="maxTopicsPerMeeting" className="block text-sm font-medium text-gray-700">Máximo de pautas por reunião</label>
+                        <input
+                            type="number"
+                            id="maxTopicsPerMeeting"
+                            name="maxTopicsPerMeeting"
+                            value={settings.maxTopicsPerMeeting}
+                            onChange={handleChange}
+                            min="1"
+                            className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="topicDuration" className="block text-sm font-medium text-gray-700">Duração média das pautas</label>
+                        <div className="mt-1 flex items-baseline gap-2">
+                             <input
+                                type="number"
+                                id="topicDuration"
+                                name="topicDuration"
+                                value={settings.topicDuration}
+                                onChange={handleChange}
+                                min="5"
+                                step="5"
+                                className="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            />
+                            <span className="text-sm text-gray-600">minutos</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label htmlFor="breakInterval" className="block text-sm font-medium text-gray-700">Intervalo entre reuniões</label>
+                         <div className="mt-1 flex items-baseline gap-2">
+                            <input
+                                type="number"
+                                id="breakInterval"
+                                name="breakInterval"
+                                value={settings.breakInterval}
+                                onChange={handleChange}
+                                min="0"
+                                step="5"
+                                className="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            />
+                            <span className="text-sm text-gray-600">minutos</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
