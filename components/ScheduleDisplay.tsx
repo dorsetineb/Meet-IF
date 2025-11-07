@@ -1,3 +1,4 @@
+
 import React, { useMemo, useState } from 'react';
 import type { Meeting, DayOfWeek, Frequency } from '../types';
 import { CalendarIcon } from './icons/CalendarIcon';
@@ -103,18 +104,8 @@ export const ScheduleDisplay: React.FC<ScheduleDisplayProps> = ({ schedule, isLo
     );
   }
 
-  if (schedule.length === 0) {
-    return (
-      <div className="text-center py-16 px-6 bg-white rounded-xl">
-        <CalendarIcon className="mx-auto h-12 w-12 text-gray-400" />
-        <h3 className="mt-2 text-sm font-medium text-gray-900">Nenhuma agenda gerada</h3>
-        <p className="mt-1 text-sm text-gray-500">Adicione equipes, configure os parâmetros e clique em "Gerar Agenda" para começar.</p>
-      </div>
-    );
-  }
-
   const meetingsByWeek = useMemo(() => {
-    if (schedule.length === 0) return {};
+    if (!schedule || schedule.length === 0) return {};
 
     const sortedSchedule = [...schedule].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     const firstDate = new Date(`${sortedSchedule[0].date}T00:00:00`);
@@ -139,6 +130,16 @@ export const ScheduleDisplay: React.FC<ScheduleDisplayProps> = ({ schedule, isLo
     }
     return grouped;
   }, [schedule]);
+
+  if (schedule.length === 0) {
+    return (
+      <div className="text-center py-16 px-6 bg-white rounded-xl">
+        <CalendarIcon className="mx-auto h-12 w-12 text-gray-400" />
+        <h3 className="mt-2 text-sm font-medium text-gray-900">Nenhuma agenda gerada</h3>
+        <p className="mt-1 text-sm text-gray-500">Adicione equipes, configure os parâmetros e clique em "Gerar Agenda" para começar.</p>
+      </div>
+    );
+  }
 
   const numWeeks = frequency === 'mensal' ? 4 : (frequency === 'quinzenal' ? 2 : 1);
   const weekNumbers = Array.from({ length: numWeeks }, (_, i) => i + 1);
