@@ -115,25 +115,25 @@ export const GeneralSettingsPanel: React.FC<GeneralSettingsPanelProps> = ({ sett
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                     <div>
-                        <label htmlFor="maxTopicsPerMeeting" className="block text-xs font-medium text-gray-700">Máximo de pautas por reunião</label>
+                        <label htmlFor="maxProjectsPerMeeting" className="block text-xs font-medium text-gray-700">Máximo de projetos por reunião</label>
                         <input
                             type="number"
-                            id="maxTopicsPerMeeting"
-                            name="maxTopicsPerMeeting"
-                            value={settings.maxTopicsPerMeeting}
+                            id="maxProjectsPerMeeting"
+                            name="maxProjectsPerMeeting"
+                            value={settings.maxProjectsPerMeeting}
                             onChange={handleChange}
                             min="1"
                             className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                     </div>
                     <div>
-                        <label htmlFor="topicDuration" className="block text-xs font-medium text-gray-700">Duração média das pautas</label>
+                        <label htmlFor="projectDuration" className="block text-xs font-medium text-gray-700">Duração média dos projetos</label>
                         <div className="mt-1 flex items-baseline gap-2">
                              <input
                                 type="number"
-                                id="topicDuration"
-                                name="topicDuration"
-                                value={settings.topicDuration}
+                                id="projectDuration"
+                                name="projectDuration"
+                                value={settings.projectDuration}
                                 onChange={handleChange}
                                 min="5"
                                 step="5"

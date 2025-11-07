@@ -13,7 +13,7 @@ interface TeamsPanelProps {
 }
 
 const TeamCard: React.FC<{team: Team, onEdit: (team: Team) => void, onDelete: (id: string) => void}> = ({ team, onEdit, onDelete }) => {
-    const totalTopics = team.participants.reduce((sum, p) => isNaN(p.topicsCount) ? sum : sum + p.topicsCount, 0);
+    const totalProjects = team.participants.reduce((sum, p) => isNaN(p.projectsCount) ? sum : sum + p.projectsCount, 0);
     
     const handleDelete = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -27,7 +27,7 @@ const TeamCard: React.FC<{team: Team, onEdit: (team: Team) => void, onDelete: (i
         >
             <div>
                 <p className="font-bold text-primary-800 text-sm">{team.name}</p>
-                <p className="text-xs text-gray-500">{totalTopics} pautas</p>
+                <p className="text-xs text-gray-500">{totalProjects} projetos</p>
             </div>
             <div className="absolute top-0 right-0 h-full flex items-center pr-2">
                  <button 

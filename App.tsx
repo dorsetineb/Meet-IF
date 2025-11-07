@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { TeamsPanel } from './components/TeamsPanel';
 import { GeneralSettingsPanel } from './components/GeneralSettingsPanel';
 import { ScheduleDisplay } from './components/ScheduleDisplay';
@@ -7,6 +7,9 @@ import { TeamModal } from './components/TeamModal';
 import { LunchBreakModal } from './components/LunchBreakModal';
 import { generateSchedule } from './services/geminiService';
 import type { GeneralSettings, Meeting, Team } from './types';
+import { ExportIcon } from './components/icons/ExportIcon';
+
+declare const html2canvas: any;
 
 const defaultSettings: GeneralSettings = {
     frequency: 'semanal',
@@ -15,9 +18,9 @@ const defaultSettings: GeneralSettings = {
     endTime: '18:00',
     lunchStartTime: '12:00',
     lunchEndTime: '13:00',
-    topicDuration: 15,
+    projectDuration: 15,
     breakInterval: 10,
-    maxTopicsPerMeeting: 8,
+    maxProjectsPerMeeting: 8,
 };
 
 const App: React.FC = () => {
@@ -76,6 +79,8 @@ const App: React.FC = () => {
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
   const [isLunchModalOpen, setIsLunchModalOpen] = useState(false);
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
+
+  const scheduleRef = useRef<HTMLDivElement>(null);
 
   const handleAddNewTeam = () => {
     setEditingTeam(null);
@@ -157,6 +162,25 @@ const App: React.FC = () => {
     }
   }, [settings, teams]);
 
+  const handleExport = () => {
+    if (scheduleRef.current) {
+        html2canvas(scheduleRef.current, {
+            useCORS: true,
+            scale: 2, // Higher scale for better quality
+            backgroundColor: '#f1f5f9' // Match the week view background
+        }).then((canvas: HTMLCanvasElement) => {
+            const link = document.createElement('a');
+            link.download = 'agenda-reunioes.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }).catch((err: Error) => {
+            console.error("Oops, something went wrong!", err);
+            setError("Falha ao exportar a agenda como imagem.");
+        });
+    }
+  };
+
+
   return (
     <div className="min-h-screen font-sans text-gray-800">
       <main className="py-10">
@@ -192,11 +216,25 @@ const App: React.FC = () => {
                 </div>
                 
                 <div className="mt-10 bg-white p-6 md:p-8 rounded-xl">
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-xl font-bold text-gray-800">Agenda Proposta</h2>
+                        {schedule.length > 0 && !isLoading && (
+                            <button
+                                onClick={handleExport}
+                                className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-primary-600 bg-primary-100 border border-transparent rounded-md hover:bg-primary-200"
+                                aria-label="Exportar agenda como imagem"
+                            >
+                                <ExportIcon className="w-4 h-4" />
+                                Exportar
+                            </button>
+                        )}
+                    </div>
                     <ScheduleDisplay 
-                    schedule={schedule} 
-                    isLoading={isLoading} 
-                    error={error} 
-                    frequency={settings.frequency}
+                        ref={scheduleRef}
+                        schedule={schedule} 
+                        isLoading={isLoading} 
+                        error={error} 
+                        frequency={settings.frequency}
                     />
                 </div>
             </div>

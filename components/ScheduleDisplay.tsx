@@ -20,7 +20,7 @@ const CalendarMeetingCard: React.FC<{ meeting: Meeting }> = ({ meeting }) => (
             {meeting.participantsInfo.map((p, index) => (
               <li key={index}>
                 <p className="text-[11px] font-medium text-gray-800 truncate">{p.participantName}</p>
-                <p className="text-[11px] text-gray-500">{p.topicsCount} {p.topicsCount > 1 ? 'pautas' : 'pauta'}</p>
+                <p className="text-[11px] text-gray-500">{p.projectsCount} {p.projectsCount > 1 ? 'projetos' : 'projeto'}</p>
               </li>
             ))}
           </ul>
@@ -82,7 +82,7 @@ const WeekView: React.FC<{ meetings: Meeting[] }> = ({ meetings }) => {
 };
 
 
-export const ScheduleDisplay: React.FC<ScheduleDisplayProps> = ({ schedule, isLoading, error, frequency }) => {
+export const ScheduleDisplay = React.forwardRef<HTMLDivElement, ScheduleDisplayProps>(({ schedule, isLoading, error, frequency }, ref) => {
   // RULE OF HOOKS: All hooks must be called at the top level, before any conditional returns.
   const [activeWeek, setActiveWeek] = useState(1);
 
@@ -161,7 +161,7 @@ export const ScheduleDisplay: React.FC<ScheduleDisplayProps> = ({ schedule, isLo
   const showTabs = frequency !== 'semanal';
 
   return (
-    <div className="space-y-6">
+    <div ref={ref} className="space-y-6">
       {showTabs && (
         <div>
             <nav className="flex space-x-2" aria-label="Tabs">
@@ -191,4 +191,6 @@ export const ScheduleDisplay: React.FC<ScheduleDisplayProps> = ({ schedule, isLo
       </div>
     </div>
   );
-};
+});
+
+ScheduleDisplay.displayName = 'ScheduleDisplay';

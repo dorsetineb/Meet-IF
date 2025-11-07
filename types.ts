@@ -4,7 +4,7 @@ export type DayOfWeek = 'Segunda' | 'Terça' | 'Quarta' | 'Quinta' | 'Sexta' | '
 export interface Participant {
   id: string;
   name: string;
-  topicsCount: number;
+  projectsCount: number;
 }
 
 export interface Team {
@@ -20,9 +20,9 @@ export interface GeneralSettings {
   endTime: string;
   lunchStartTime: string | null;
   lunchEndTime: string | null;
-  topicDuration: number;
+  projectDuration: number;
   breakInterval: number;
-  maxTopicsPerMeeting: number;
+  maxProjectsPerMeeting: number;
 }
 
 export interface Meeting {
@@ -34,6 +34,6 @@ export interface Meeting {
   endTime: string;
   participantsInfo: {
     participantName: string;
-    topicsCount: number;
+    projectsCount: number;
   }[];
 }

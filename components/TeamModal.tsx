@@ -14,7 +14,7 @@ interface TeamModalProps {
 const emptyParticipant = (): Participant => ({
   id: crypto.randomUUID(),
   name: '',
-  topicsCount: 1,
+  projectsCount: 1,
 });
 
 export const TeamModal: React.FC<TeamModalProps> = ({ team, onSave, onClose }) => {
@@ -32,9 +32,9 @@ export const TeamModal: React.FC<TeamModalProps> = ({ team, onSave, onClose }) =
     }
   }, [team]);
   
-  const handleParticipantChange = (index: number, field: 'name' | 'topicsCount', value: string | number) => {
+  const handleParticipantChange = (index: number, field: 'name' | 'projectsCount', value: string | number) => {
     const newParticipants = [...participants];
-    if (field === 'topicsCount' && typeof value === 'string') {
+    if (field === 'projectsCount' && typeof value === 'string') {
         // Allow NaN in state to represent an empty input, enabling user to clear the field before typing a new number.
         newParticipants[index][field] = parseInt(value, 10);
     } else {
@@ -59,8 +59,8 @@ export const TeamModal: React.FC<TeamModalProps> = ({ team, onSave, onClose }) =
         setError("O nome da equipe é obrigatório.");
         return;
     }
-    if (participants.some(p => !p.name.trim() || isNaN(p.topicsCount) || p.topicsCount <= 0)) {
-        setError("Todos os participantes devem ter um nome e pelo menos uma pauta.");
+    if (participants.some(p => !p.name.trim() || isNaN(p.projectsCount) || p.projectsCount <= 0)) {
+        setError("Todos os participantes devem ter um nome e pelo menos um projeto.");
         return;
     }
 
@@ -95,7 +95,7 @@ export const TeamModal: React.FC<TeamModalProps> = ({ team, onSave, onClose }) =
             </div>
 
             <div>
-                <h3 className="text-xs font-medium text-gray-700 mb-2">Participantes e Pautas</h3>
+                <h3 className="text-xs font-medium text-gray-700 mb-2">Participantes e Projetos</h3>
                 <div className="space-y-3">
                     {participants.map((p, index) => (
                         <div key={p.id} className="grid grid-cols-12 gap-2 items-center">
@@ -108,10 +108,10 @@ export const TeamModal: React.FC<TeamModalProps> = ({ team, onSave, onClose }) =
                             />
                              <input
                                 type="number"
-                                aria-label="Número de pautas"
-                                value={isNaN(p.topicsCount) ? '' : p.topicsCount}
+                                aria-label="Número de projetos"
+                                value={isNaN(p.projectsCount) ? '' : p.projectsCount}
                                 min="1"
-                                onChange={(e) => handleParticipantChange(index, 'topicsCount', e.target.value)}
+                                onChange={(e) => handleParticipantChange(index, 'projectsCount', e.target.value)}
                                 className="col-span-3 mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-xs"
                             />
                             <div className="col-span-2 flex justify-end">
