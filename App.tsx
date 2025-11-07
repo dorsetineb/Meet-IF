@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useEffect } from 'react';
 import { TeamsPanel } from './components/TeamsPanel';
 import { GeneralSettingsPanel } from './components/GeneralSettingsPanel';
@@ -159,47 +160,44 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen font-sans text-gray-800">
       <main className="py-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
-                <div className="lg:col-span-3">
-                    <GeneralSettingsPanel
-                        settings={settings}
-                        setSettings={setSettings}
-                        onLunchSettingsClick={handleOpenLunchModal}
-                    />
-                </div>
-                <div className="lg:col-span-1">
-                    <TeamsPanel
-                        teams={teams}
-                        onAddNewTeam={handleAddNewTeam}
-                        onEditTeam={handleEditTeam}
-                        onDeleteTeam={handleDeleteTeam}
-                    />
-                </div>
-            </div>
-
-            <div className="mt-8">
-                <button
-                    type="button"
-                    onClick={handleGenerateSchedule}
-                    disabled={isLoading || teams.length === 0}
-                    className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:bg-primary-300 disabled:cursor-not-allowed"
-                    >
-                    {isLoading ? (
-                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                    ) : 'Gerar Agenda'}
-                </button>
-            </div>
-            
-            <div className="mt-10">
-                <ScheduleDisplay 
-                schedule={schedule} 
-                isLoading={isLoading} 
-                error={error} 
+        <div className="grid grid-cols-12 gap-8 max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="col-span-12 lg:col-span-3">
+                 <TeamsPanel
+                    teams={teams}
+                    onAddNewTeam={handleAddNewTeam}
+                    onEditTeam={handleEditTeam}
+                    onDeleteTeam={handleDeleteTeam}
                 />
+            </div>
+            <div className="col-span-12 lg:col-span-9">
+                <GeneralSettingsPanel
+                    settings={settings}
+                    setSettings={setSettings}
+                    onLunchSettingsClick={handleOpenLunchModal}
+                />
+                <div className="mt-8">
+                    <button
+                        type="button"
+                        onClick={handleGenerateSchedule}
+                        disabled={isLoading || teams.length === 0}
+                        className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:bg-primary-300 disabled:cursor-not-allowed"
+                        >
+                        {isLoading ? (
+                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        ) : 'Gerar Agenda'}
+                    </button>
+                </div>
+                
+                <div className="mt-10">
+                    <ScheduleDisplay 
+                    schedule={schedule} 
+                    isLoading={isLoading} 
+                    error={error} 
+                    />
+                </div>
             </div>
         </div>
       </main>
