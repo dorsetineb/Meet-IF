@@ -99,8 +99,28 @@ export const generateSchedule = async (settings: GeneralSettings, teams: Team[])
     if (!jsonText) {
       throw new Error("A API retornou uma resposta vazia.");
     }
+    
     const schedule = JSON.parse(jsonText);
-    return schedule;
+
+    if (!Array.isArray(schedule)) {
+        console.error("A resposta da IA não é um array:", schedule);
+        throw new Error("A IA retornou um formato de dados inesperado.");
+    }
+
+    const validatedSchedule = schedule.filter(meeting => {
+        if (!meeting || typeof meeting.date !== 'string') {
+            console.warn('Filtrando reunião com data ausente ou inválida:', meeting);
+            return false;
+        }
+        const d = new Date(meeting.date);
+        if (isNaN(d.getTime())) {
+            console.warn('Filtrando reunião com data que não pode ser parseada:', meeting);
+            return false;
+        }
+        return true;
+    });
+
+    return validatedSchedule;
   } catch (error) {
     console.error("Erro ao gerar agenda com Gemini:", error);
     if (error instanceof Error) {
