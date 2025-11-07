@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
 import { TeamsPanel } from './components/TeamsPanel';
 import { GeneralSettingsPanel } from './components/GeneralSettingsPanel';
@@ -140,7 +139,15 @@ const App: React.FC = () => {
       setSchedule(newSchedule);
     } catch (e) {
       if (e instanceof Error) {
-        setError(e.message);
+        if (
+            e.message.includes("API key not valid") ||
+            e.message.includes("API_KEY_INVALID") ||
+            e.message.includes("API_KEY environment variable not set")
+        ) {
+            setError("Falha na autenticação: A chave da API é inválida ou não foi configurada. Verifique as variáveis de ambiente na sua plataforma de hospedagem (ex: Vercel) e faça o deploy novamente.");
+        } else {
+            setError(e.message);
+        }
       } else {
         setError('Ocorreu um erro inesperado.');
       }

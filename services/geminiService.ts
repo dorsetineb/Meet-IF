@@ -1,12 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { GeneralSettings, Team, Meeting } from '../types';
 
-if (!process.env.API_KEY) {
-  throw new Error("API_KEY environment variable not set");
-}
-
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
 const buildPrompt = (settings: GeneralSettings, teams: Team[]): string => {
   const teamsDescription = teams.map(team => {
       const totalTopics = team.participants.reduce((sum, p) => sum + p.topicsCount, 0);
@@ -82,6 +76,11 @@ const meetingSchema = {
 };
 
 export const generateSchedule = async (settings: GeneralSettings, teams: Team[]): Promise<Meeting[]> => {
+  if (!process.env.API_KEY) {
+    throw new Error("API_KEY environment variable not set");
+  }
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
   try {
     const prompt = buildPrompt(settings, teams);
     const response = await ai.models.generateContent({
