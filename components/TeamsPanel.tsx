@@ -1,3 +1,4 @@
+
 import React from 'react';
 import type { Team } from '../types';
 import { PlusIcon } from './icons/PlusIcon';
@@ -43,7 +44,7 @@ const TeamCard: React.FC<{team: Team, onEdit: (team: Team) => void, onDelete: (i
 
 export const TeamsPanel: React.FC<TeamsPanelProps> = ({ teams, onAddNewTeam, onEditTeam, onDeleteTeam }) => {
     return (
-        <div className="bg-white p-6 md:p-8 rounded-xl shadow-lg h-full">
+        <div className="bg-white p-6 md:p-8 rounded-xl h-full">
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-gray-800">Equipes</h2>
                 <button 

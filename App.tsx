@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from 'react';
 import { TeamsPanel } from './components/TeamsPanel';
 import { GeneralSettingsPanel } from './components/GeneralSettingsPanel';
@@ -101,7 +102,7 @@ const App: React.FC = () => {
   }, [settings, teams]);
 
   return (
-    <div className="min-h-screen bg-slate-100 font-sans text-gray-800">
+    <div className="min-h-screen font-sans text-gray-800">
       <main className="py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
