@@ -13,16 +13,20 @@ const buildPrompt = (settings: GeneralSettings, teams: Team[]): string => {
       const participantsDescription = team.participants.map(p => `${p.name} (${p.topicsCount} pautas)`).join(', ');
       return `- Equipe: ${team.name} (Total de pautas: ${totalTopics}, Participantes: ${participantsDescription})`;
   }).join('\n');
+  
+  const lunchDescription = settings.lunchStartTime && settings.lunchEndTime
+    ? `das ${settings.lunchStartTime} às ${settings.lunchEndTime} (nenhuma reunião deve ser agendada neste período)`
+    : 'Não há um intervalo de almoço definido. Evite agendar reuniões entre 12:00 e 13:00, se possível.';
 
   return `
       Você é um assistente especialista em agendamento de reuniões para múltiplas equipes. Com base nos seguintes parâmetros gerais e na lista de equipes, gere uma agenda de reuniões a partir da data de hoje.
 
       Parâmetros Gerais:
-      - Período de Agendamento (Frequência): ${settings.frequency}. Isso significa que todas as reuniões necessárias para cobrir as pautas de cada equipe devem ser agendadas dentro do próximo período: uma semana (semanal), duas semanas (quinzenal) ou um mês (mensal). Se uma equipe precisa de múltiplas reuniões, todas elas devem ocorrer dentro deste único período. A agenda não deve se repetir ou se estender para além desse período.
+      - Período de Agendamento (Frequência): ${settings.frequency}. Isso significa que todas as reuniões necessárias para cobrir as pautas de cada equipe devem ser agendadas dentro do próximo período: uma semana (semanal), duas semanas (quinzenal) ou um mês (mensal). Se uma equipe precisa de múltiplas reuniões, todas as elas devem ocorrer dentro deste único período. A agenda não deve se repetir ou se estender para além desse período.
       - Dias da semana permitidos: ${settings.days.join(', ')}
       - Horário de início da janela disponível: ${settings.startTime}
       - Horário de fim da janela disponível: ${settings.endTime}
-      - Intervalo de almoço: das ${settings.lunchStartTime} às ${settings.lunchEndTime} (nenhuma reunião deve ser agendada neste período)
+      - Intervalo de almoço: ${lunchDescription}
       - Duração por pauta (minutos): ${settings.topicDuration}
       - Máximo de pautas por reunião: ${settings.maxTopicsPerMeeting}
       - Intervalo mínimo entre reuniões no mesmo dia (minutos): ${settings.breakInterval}

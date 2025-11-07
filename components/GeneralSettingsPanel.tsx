@@ -1,10 +1,12 @@
 import React from 'react';
 import type { GeneralSettings, DayOfWeek } from '../types';
 import { DiskIcon } from './icons/DiskIcon';
+import { CoffeeIcon } from './icons/CoffeeIcon';
 
 interface GeneralSettingsPanelProps {
   settings: GeneralSettings;
   setSettings: React.Dispatch<React.SetStateAction<GeneralSettings>>;
+  onLunchSettingsClick: () => void;
 }
 
 const ALL_DAYS: DayOfWeek[] = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
@@ -25,7 +27,7 @@ const InputField = ({ id, label, type, value, onChange, min, step }: { id: strin
   </div>
 );
 
-export const GeneralSettingsPanel: React.FC<GeneralSettingsPanelProps> = ({ settings, setSettings }) => {
+export const GeneralSettingsPanel: React.FC<GeneralSettingsPanelProps> = ({ settings, setSettings, onLunchSettingsClick }) => {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         const isNumber = e.target instanceof HTMLInputElement && e.target.type === 'number';
@@ -61,7 +63,7 @@ export const GeneralSettingsPanel: React.FC<GeneralSettingsPanelProps> = ({ sett
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-end">
                     <div>
                         <label htmlFor="frequency" className="block text-sm font-medium text-gray-700">Frequência</label>
-                        <select id="frequency" name="frequency" value={settings.frequency} onChange={handleChange} className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md">
+                        <select id="frequency" name="frequency" value={settings.frequency} onChange={handleChange} className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
                             <option value="semanal">Semanal</option>
                             <option value="quinzenal">Quinzenal</option>
                             <option value="mensal">Mensal</option>
@@ -79,24 +81,29 @@ export const GeneralSettingsPanel: React.FC<GeneralSettingsPanelProps> = ({ sett
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 items-end">
                     <InputField id="startTime" label="Início da Janela de Horário" type="time" value={settings.startTime} onChange={handleChange} />
+                    
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 invisible" aria-hidden="true">Almoço</label>
+                        <button 
+                            type="button" 
+                            onClick={onLunchSettingsClick}
+                            className={`mt-1 block w-full px-3 py-2 text-sm font-medium rounded-md shadow-sm border transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 ${settings.lunchStartTime && settings.lunchEndTime ? 'bg-primary-600 text-white hover:bg-primary-700 border-primary-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 border-gray-200 hover:border-gray-300'}`}
+                            aria-label="Definir ou editar horário de almoço"
+                        >
+                            Almoço
+                        </button>
+                    </div>
+
                     <InputField id="endTime" label="Fim da Janela de Horário" type="time" value={settings.endTime} onChange={handleChange} />
                 </div>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <InputField id="lunchStartTime" label="Início do Almoço" type="time" value={settings.lunchStartTime} onChange={handleChange} />
-                    <InputField id="lunchEndTime" label="Fim do Almoço" type="time" value={settings.lunchEndTime} onChange={handleChange} />
-                </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                     <InputField id="maxTopicsPerMeeting" label="Máx. Pautas por Reunião" type="number" value={settings.maxTopicsPerMeeting} onChange={handleChange} min="1" />
                     <InputField id="topicDuration" label="Duração/Pauta (min)" type="number" value={settings.topicDuration} onChange={handleChange} min="5" step="5" />
-                </div>
-                
-                 <div>
                     <InputField id="breakInterval" label="Intervalo entre reuniões (min)" type="number" value={settings.breakInterval} onChange={handleChange} min="0" step="5" />
-                 </div>
+                </div>
             </div>
         </div>
     );

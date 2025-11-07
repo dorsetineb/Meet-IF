@@ -18,8 +18,8 @@ export interface GeneralSettings {
   days: DayOfWeek[];
   startTime: string;
   endTime: string;
-  lunchStartTime: string;
-  lunchEndTime: string;
+  lunchStartTime: string | null;
+  lunchEndTime: string | null;
   topicDuration: number;
   breakInterval: number;
   maxTopicsPerMeeting: number;

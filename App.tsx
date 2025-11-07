@@ -3,13 +3,14 @@ import { TeamsPanel } from './components/TeamsPanel';
 import { GeneralSettingsPanel } from './components/GeneralSettingsPanel';
 import { ScheduleDisplay } from './components/ScheduleDisplay';
 import { TeamModal } from './components/TeamModal';
+import { LunchBreakModal } from './components/LunchBreakModal';
 import { generateSchedule } from './services/geminiService';
 import type { GeneralSettings, Meeting, Team } from './types';
 
 const App: React.FC = () => {
   const [settings, setSettings] = useState<GeneralSettings>({
     frequency: 'semanal',
-    days: ['Segunda', 'Quarta', 'Sexta'],
+    days: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'],
     startTime: '09:00',
     endTime: '18:00',
     lunchStartTime: '12:00',
@@ -23,21 +24,22 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
+  const [isLunchModalOpen, setIsLunchModalOpen] = useState(false);
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
 
   const handleAddNewTeam = () => {
     setEditingTeam(null);
-    setIsModalOpen(true);
+    setIsTeamModalOpen(true);
   };
 
   const handleEditTeam = (team: Team) => {
     setEditingTeam(team);
-    setIsModalOpen(true);
+    setIsTeamModalOpen(true);
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
+  const handleCloseTeamModal = () => {
+    setIsTeamModalOpen(false);
     setEditingTeam(null);
   };
 
@@ -49,13 +51,19 @@ const App: React.FC = () => {
       }
       return [...prevTeams, team];
     });
-    handleCloseModal();
+    handleCloseTeamModal();
   };
   
   const handleDeleteTeam = (teamId: string) => {
     setTeams(prevTeams => prevTeams.filter(t => t.id !== teamId));
   };
 
+  const handleOpenLunchModal = () => setIsLunchModalOpen(true);
+  const handleCloseLunchModal = () => setIsLunchModalOpen(false);
+  const handleSaveLunchBreak = (start: string | null, end: string | null) => {
+    setSettings(prev => ({ ...prev, lunchStartTime: start, lunchEndTime: end }));
+    handleCloseLunchModal();
+  };
 
   const handleGenerateSchedule = useCallback(async () => {
     setIsLoading(true);
@@ -72,7 +80,11 @@ const App: React.FC = () => {
         if (new Date(`1970-01-01T${settings.endTime}`) <= new Date(`1970-01-01T${settings.startTime}`)) {
             throw new Error("O horário de término deve ser posterior ao horário de início.");
         }
-        if (new Date(`1970-01-01T${settings.lunchEndTime}`) <= new Date(`1970-01-01T${settings.lunchStartTime}`)) {
+        if (
+            settings.lunchStartTime &&
+            settings.lunchEndTime &&
+            (new Date(`1970-01-01T${settings.lunchEndTime}`) <= new Date(`1970-01-01T${settings.lunchStartTime}`))
+        ) {
             throw new Error("O horário de término do almoço deve ser posterior ao horário de início.");
         }
       const newSchedule = await generateSchedule(settings, teams);
@@ -97,6 +109,7 @@ const App: React.FC = () => {
                     <GeneralSettingsPanel
                         settings={settings}
                         setSettings={setSettings}
+                        onLunchSettingsClick={handleOpenLunchModal}
                     />
                 </div>
                 <div className="lg:col-span-1">
@@ -134,11 +147,19 @@ const App: React.FC = () => {
             </div>
         </div>
       </main>
-      {isModalOpen && (
+      {isTeamModalOpen && (
         <TeamModal 
             team={editingTeam}
             onSave={handleSaveTeam}
-            onClose={handleCloseModal}
+            onClose={handleCloseTeamModal}
+        />
+      )}
+      {isLunchModalOpen && (
+        <LunchBreakModal
+            startTime={settings.lunchStartTime}
+            endTime={settings.lunchEndTime}
+            onSave={handleSaveLunchBreak}
+            onClose={handleCloseLunchModal}
         />
       )}
     </div>
