@@ -16,9 +16,12 @@ const CalendarMeetingCard: React.FC<{ meeting: Meeting }> = ({ meeting }) => (
     <div>
       <p className="font-bold text-sm text-primary-800 truncate">{meeting.title}</p>
       <div className="border-t pt-2 mt-2">
-         <ul className="text-xs text-gray-600 space-y-1">
+         <ul className="space-y-2">
             {meeting.participantsInfo.map((p, index) => (
-              <li key={index} className="truncate">{p.participantName} ({p.topicsCount} {p.topicsCount > 1 ? 'pautas' : 'pauta'})</li>
+              <li key={index}>
+                <p className="text-xs font-medium text-gray-800 truncate">{p.participantName}</p>
+                <p className="text-[11px] text-gray-500">{p.topicsCount} {p.topicsCount > 1 ? 'pautas' : 'pauta'}</p>
+              </li>
             ))}
           </ul>
       </div>
@@ -55,23 +58,25 @@ const WeekView: React.FC<{ meetings: Meeting[] }> = ({ meetings }) => {
   }, [meetings]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-start">
-      {weekDays.map(day => (
-        <div key={day} className="bg-slate-100 rounded-xl p-4 space-y-4 min-h-[10rem]">
-          <h3 className="font-bold text-center text-gray-700 border-b pb-2">{day}</h3>
-          <div className="space-y-3">
-            {(meetingsByDay[day] && meetingsByDay[day]!.length > 0) ? (
-              meetingsByDay[day]!.map(meeting => (
-                <CalendarMeetingCard key={meeting.id} meeting={meeting} />
-              ))
-            ) : (
-              <div className="text-center text-sm text-gray-400 pt-8">
-                <p>Nenhuma reunião.</p>
-              </div>
-            )}
+    <div className="bg-slate-100 rounded-xl">
+      <div className="grid grid-cols-1 md:grid-cols-5">
+        {weekDays.map((day, index) => (
+          <div key={day} className={`p-4 ${index < weekDays.length - 1 ? 'border-b md:border-b-0 md:border-r border-slate-200' : ''}`}>
+            <h3 className="font-bold text-center text-gray-700 border-b border-slate-200 pb-2 mb-4">{day}</h3>
+            <div className="space-y-3 min-h-[10rem]">
+              {(meetingsByDay[day] && meetingsByDay[day]!.length > 0) ? (
+                meetingsByDay[day]!.map(meeting => (
+                  <CalendarMeetingCard key={meeting.id} meeting={meeting} />
+                ))
+              ) : (
+                <div className="flex items-center justify-center h-full text-center text-sm text-gray-400 pt-8">
+                  <p>Nenhuma reunião.</p>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 };
