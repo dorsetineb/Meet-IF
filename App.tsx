@@ -196,6 +196,7 @@ const App: React.FC = () => {
                     schedule={schedule} 
                     isLoading={isLoading} 
                     error={error} 
+                    frequency={settings.frequency}
                     />
                 </div>
             </div>

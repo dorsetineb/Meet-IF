@@ -38,7 +38,7 @@ const buildPrompt = (settings: GeneralSettings, teams: Team[]): string => {
          - Se o agendamento for quinzenal ou mensal, a prioridade é agendá-las em semanas diferentes.
          - Esta regra é mais importante do que tentar agrupar todas as reuniões o mais cedo possível. Distribua-as para garantir o espaçamento.
       6. Calcule a duração de cada reunião individualmente com base no número de pautas atribuídas a ela.
-      7. Agende TODAS as reuniões resultantes, distribuindo-as de forma equilibrada ao longo dos dias e horários permitidos DENTRO DO PERÍODO DE AGENDAMENTO DEFINIDO PELA FREQUÊNCIA, sempre respeitando a regra crítica de espaçamento.
+      7. Agende TODAS as reuniões resultantes, distribuindo-as de forma equilibrada ao longo dos dias e horários permitidos DENTRO DO PERÍODO DE AGENDAMENTO DEFINIDO PELA FREQUÊNCIA. Se a frequência for 'quinzenal', distribua o total de reuniões de forma equilibrada entre as duas semanas. Se for 'mensal', distribua entre as quatro semanas. Esta distribuição equilibrada é crucial.
       8. Respeite a frequência, os dias da semana e a janela de horários para TODAS as reuniões.
       9. Assegure que haja o intervalo mínimo especificado entre reuniões e NUNCA agende nada durante o intervalo de almoço.
       10. A data deve ser no formato AAAA-MM-DD e o horário no formato HH:mm.

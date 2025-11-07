@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import type { Meeting, DayOfWeek } from '../types';
+import type { Meeting, DayOfWeek, Frequency } from '../types';
 import { CalendarIcon } from './icons/CalendarIcon';
 import { ClockIcon } from './icons/ClockIcon';
 
@@ -7,6 +7,7 @@ interface ScheduleDisplayProps {
   schedule: Meeting[];
   isLoading: boolean;
   error: string | null;
+  frequency: Frequency;
 }
 
 const CalendarMeetingCard: React.FC<{ meeting: Meeting }> = ({ meeting }) => (
@@ -28,8 +29,54 @@ const CalendarMeetingCard: React.FC<{ meeting: Meeting }> = ({ meeting }) => (
   </div>
 );
 
+const weekDays: DayOfWeek[] = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
 
-export const ScheduleDisplay: React.FC<ScheduleDisplayProps> = ({ schedule, isLoading, error }) => {
+const WeekView: React.FC<{ meetings: Meeting[] }> = ({ meetings }) => {
+  const meetingsByDay = useMemo(() => {
+    const grouped: { [key in DayOfWeek]?: Meeting[] } = {};
+    const sortedSchedule = [...meetings].sort((a, b) =>
+      new Date(`${a.date}T${a.startTime}`).getTime() - new Date(`${b.date}T${b.startTime}`).getTime()
+    );
+
+    for (const meeting of sortedSchedule) {
+      const date = new Date(`${meeting.date}T00:00:00`);
+      let dayName = new Intl.DateTimeFormat('pt-BR', { weekday: 'long' }).format(date);
+      dayName = dayName.charAt(0).toUpperCase() + dayName.slice(1).replace(/-feira/g, '');
+
+      if (weekDays.includes(dayName as DayOfWeek)) {
+        if (!grouped[dayName as DayOfWeek]) {
+          grouped[dayName as DayOfWeek] = [];
+        }
+        grouped[dayName as DayOfWeek]!.push(meeting);
+      }
+    }
+    return grouped;
+  }, [meetings]);
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-start">
+      {weekDays.map(day => (
+        <div key={day} className="bg-slate-100 rounded-xl p-4 space-y-4 min-h-[10rem]">
+          <h3 className="font-bold text-center text-gray-700 border-b pb-2">{day}</h3>
+          <div className="space-y-3">
+            {(meetingsByDay[day] && meetingsByDay[day]!.length > 0) ? (
+              meetingsByDay[day]!.map(meeting => (
+                <CalendarMeetingCard key={meeting.id} meeting={meeting} />
+              ))
+            ) : (
+              <div className="text-center text-sm text-gray-400 pt-8">
+                <p>Nenhuma reunião.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+
+export const ScheduleDisplay: React.FC<ScheduleDisplayProps> = ({ schedule, isLoading, error, frequency }) => {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -64,52 +111,50 @@ export const ScheduleDisplay: React.FC<ScheduleDisplayProps> = ({ schedule, isLo
     );
   }
 
-  const weekDays: DayOfWeek[] = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
+  const meetingsByWeek = useMemo(() => {
+    if (schedule.length === 0) return {};
 
-  const meetingsByDay = useMemo(() => {
-    const grouped: { [key in DayOfWeek]?: Meeting[] } = {};
-    
-    const sortedSchedule = [...schedule].sort((a,b) => 
-        new Date(`${a.date}T${a.startTime}`).getTime() - new Date(`${b.date}T${b.startTime}`).getTime()
-    );
+    const sortedSchedule = [...schedule].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    const firstDate = new Date(`${sortedSchedule[0].date}T00:00:00`);
 
-    for (const meeting of sortedSchedule) {
-      const date = new Date(`${meeting.date}T00:00:00`);
-      let dayName = new Intl.DateTimeFormat('pt-BR', { weekday: 'long' }).format(date);
-      dayName = dayName.charAt(0).toUpperCase() + dayName.slice(1).replace(/-feira/g, '');
-      
-      if (weekDays.includes(dayName as DayOfWeek)) {
-        if (!grouped[dayName as DayOfWeek]) {
-          grouped[dayName as DayOfWeek] = [];
+    const startOfWeek1 = new Date(firstDate);
+    const dayOfWeek = startOfWeek1.getDay(); // Sunday = 0, Monday = 1
+    const diff = startOfWeek1.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+    startOfWeek1.setDate(diff);
+    startOfWeek1.setHours(0, 0, 0, 0);
+
+    const grouped: { [week: number]: Meeting[] } = {};
+    for (const meeting of schedule) {
+        const meetingDate = new Date(`${meeting.date}T00:00:00`);
+        const diffTime = meetingDate.getTime() - startOfWeek1.getTime();
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        const weekNumber = Math.floor(diffDays / 7) + 1;
+        
+        if (!grouped[weekNumber]) {
+            grouped[weekNumber] = [];
         }
-        grouped[dayName as DayOfWeek]!.push(meeting);
-      }
+        grouped[weekNumber].push(meeting);
     }
     return grouped;
   }, [schedule]);
 
+  const numWeeks = frequency === 'mensal' ? 4 : (frequency === 'quinzenal' ? 2 : 1);
+  const weekNumbers = Array.from({ length: numWeeks }, (_, i) => i + 1);
 
   return (
     <div className="space-y-8">
       <h2 className="text-3xl font-bold text-gray-800 text-center">Agenda Proposta</h2>
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-start">
-        {weekDays.map(day => (
-          <div key={day} className="bg-slate-100 rounded-xl p-4 space-y-4 min-h-[10rem]">
-            <h3 className="font-bold text-center text-gray-700 border-b pb-2">{day}</h3>
-            <div className="space-y-3">
-              {(meetingsByDay[day] && meetingsByDay[day]!.length > 0) ? (
-                meetingsByDay[day]!.map(meeting => (
-                  <CalendarMeetingCard key={meeting.id} meeting={meeting} />
-                ))
-              ) : (
-                <div className="text-center text-sm text-gray-400 pt-8">
-                  <p>Nenhuma reunião.</p>
-                </div>
-              )}
-            </div>
+      {weekNumbers.map(weekNum => {
+        const weekMeetings = meetingsByWeek[weekNum] || [];
+        return (
+          <div key={weekNum} className="space-y-4">
+            {frequency !== 'semanal' && (
+              <h3 className="text-xl font-semibold text-gray-700 pl-2 border-b-2 pb-2">Semana {weekNum}</h3>
+            )}
+            <WeekView meetings={weekMeetings} />
           </div>
-        ))}
-      </div>
+        );
+      })}
     </div>
   );
 };
