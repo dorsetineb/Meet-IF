@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import { GeneralSettings, Team, Meeting } from '../types';
 
@@ -9,7 +10,7 @@ const buildPrompt = (settings: GeneralSettings, teams: Team[]): string => {
   }).join('\n');
   
   const lunchDescription = settings.lunchStartTime && settings.lunchEndTime
-    ? `das ${settings.lunchStartTime} às ${settings.lunchEndTime} (nenhuma reunião deve ser agendada neste período)`
+    ? `das ${settings.lunchStartTime} às ${settings.lunchEndTime}. Este período DEVE ser tratado como um bloco indisponível dentro da janela de horários. É terminantemente PROIBIDO agendar qualquer reunião que se sobreponha a este horário, mesmo que parcialmente.`
     : 'Não há um intervalo de almoço definido. Evite agendar reuniões entre 12:00 e 13:00, se possível.';
 
   return `
@@ -43,7 +44,7 @@ const buildPrompt = (settings: GeneralSettings, teams: Team[]): string => {
          - **Entre Dias da Semana:** Dentro de cada semana, distribua as reuniões de forma equilibrada entre os dias disponíveis. Evite concentrar todas as reuniões no início da semana (ex: Segunda e Terça). Utilize todos os dias permitidos.
          - **Dentro do Dia:** Para os dias que tiverem mais de uma reunião, tente agendar uma pela manhã e outra à tarde, se possível, para não sobrecarregar um período do dia.
       8. Respeite a frequência, os dias da semana e a janela de horários para TODAS as reuniões.
-      9. Assegure que haja o intervalo mínimo especificado entre reuniões e NUNCA agende nada durante o intervalo de almoço.
+      9. Assegure que haja o intervalo mínimo especificado entre reuniões. A regra do intervalo de almoço é ABSOLUTA e mais importante que todas as outras: NENHUMA reunião pode começar, terminar ou transcorrer dentro do período de almoço. Verifique cada reunião agendada para garantir o cumprimento estrito desta diretriz.
       10. A data deve ser no formato AAAA-MM-DD e o horário no formato HH:mm.
       11. Em vez de gerar uma lista de projetos genéricos, o campo 'participantsInfo' deve ser um array de objetos, onde cada objeto contém 'participantName' e 'projectsCount', indicando quantos projetos aquele participante apresentará naquela reunião específica.
       12. O formato de saída deve ser um JSON array de objetos de reunião. Certifique-se de que a propriedade 'teamName' em cada objeto de reunião corresponde ao nome da equipe correta.
