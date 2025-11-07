@@ -191,7 +191,7 @@ const App: React.FC = () => {
                     </button>
                 </div>
                 
-                <div className="mt-10">
+                <div className="mt-10 bg-white p-6 md:p-8 rounded-xl">
                     <ScheduleDisplay 
                     schedule={schedule} 
                     isLoading={isLoading} 

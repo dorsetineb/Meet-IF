@@ -143,7 +143,7 @@ export const ScheduleDisplay: React.FC<ScheduleDisplayProps> = ({ schedule, isLo
 
   if (schedule.length === 0) {
     return (
-      <div className="text-center py-16 px-6 bg-white rounded-xl">
+      <div className="text-center py-16 px-6">
         <CalendarIcon className="mx-auto h-12 w-12 text-gray-400" />
         <h3 className="mt-2 text-sm font-medium text-gray-900">Nenhuma agenda gerada</h3>
         <p className="mt-1 text-sm text-gray-500">Adicione equipes, configure os parâmetros e clique em "Gerar Agenda" para começar.</p>
@@ -158,17 +158,17 @@ export const ScheduleDisplay: React.FC<ScheduleDisplayProps> = ({ schedule, isLo
   return (
     <div className="space-y-6">
       {showTabs && (
-        <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-6" aria-label="Tabs">
+        <div>
+            <nav className="flex space-x-2" aria-label="Tabs">
                 {weekNumbers.map(weekNum => (
                      <button
                         key={weekNum}
                         onClick={() => setActiveWeek(weekNum)}
                         className={`${
                             activeWeek === weekNum
-                            ? 'border-primary-500 text-primary-600'
-                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                        } whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors duration-200`}
+                            ? 'bg-primary-600 text-white shadow'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        } whitespace-nowrap py-2 px-4 rounded-md font-medium text-sm transition-colors duration-200`}
                     >
                         Semana {weekNum}
                     </button>
