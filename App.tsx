@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { TeamsPanel } from './components/TeamsPanel';
 import { GeneralSettingsPanel } from './components/GeneralSettingsPanel';
 import { ScheduleDisplay } from './components/ScheduleDisplay';
@@ -8,8 +8,7 @@ import { LunchBreakModal } from './components/LunchBreakModal';
 import { generateSchedule } from './services/geminiService';
 import type { GeneralSettings, Meeting, Team } from './types';
 
-const App: React.FC = () => {
-  const [settings, setSettings] = useState<GeneralSettings>({
+const defaultSettings: GeneralSettings = {
     frequency: 'semanal',
     days: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'],
     startTime: '09:00',
@@ -19,9 +18,58 @@ const App: React.FC = () => {
     topicDuration: 15,
     breakInterval: 10,
     maxTopicsPerMeeting: 8,
-  });
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [schedule, setSchedule] = useState<Meeting[]>([]);
+};
+
+const App: React.FC = () => {
+    const [settings, setSettings] = useState<GeneralSettings>(() => {
+        const saved = localStorage.getItem('meet-if-settings');
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                return { ...defaultSettings, ...parsed };
+            } catch (e) {
+                console.error("Could not parse settings from localStorage", e);
+            }
+        }
+        return defaultSettings;
+    });
+
+    const [teams, setTeams] = useState<Team[]>(() => {
+        const saved = localStorage.getItem('meet-if-teams');
+        if (saved) {
+            try {
+                return JSON.parse(saved);
+            } catch (e) {
+                console.error("Could not parse teams from localStorage", e);
+            }
+        }
+        return [];
+    });
+
+    const [schedule, setSchedule] = useState<Meeting[]>(() => {
+        const saved = localStorage.getItem('meet-if-schedule');
+        if (saved) {
+            try {
+                return JSON.parse(saved);
+            } catch (e) {
+                console.error("Could not parse schedule from localStorage", e);
+            }
+        }
+        return [];
+    });
+    
+    useEffect(() => {
+        localStorage.setItem('meet-if-settings', JSON.stringify(settings));
+    }, [settings]);
+
+    useEffect(() => {
+        localStorage.setItem('meet-if-teams', JSON.stringify(teams));
+    }, [teams]);
+
+    useEffect(() => {
+        localStorage.setItem('meet-if-schedule', JSON.stringify(schedule));
+    }, [schedule]);
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
