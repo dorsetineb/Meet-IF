@@ -1,5 +1,6 @@
 import React from 'react';
 import type { GeneralSettings, DayOfWeek } from '../types';
+import { DiskIcon } from './icons/DiskIcon';
 
 interface GeneralSettingsPanelProps {
   settings: GeneralSettings;
@@ -39,10 +40,23 @@ export const GeneralSettingsPanel: React.FC<GeneralSettingsPanelProps> = ({ sett
             return { ...prev, days: newDays };
         });
     };
+    
+    const handleSave = () => {
+        alert('Configurações salvas!');
+    };
 
     return (
         <div className="bg-white p-6 md:p-8 rounded-xl shadow-lg">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">Configurações Gerais</h2>
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-800">Configurações Gerais</h2>
+                <button 
+                    onClick={handleSave} 
+                    className="p-2 text-white bg-primary-600 rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                    aria-label="Salvar configurações"
+                >
+                    <DiskIcon className="w-5 h-5" />
+                </button>
+            </div>
             <div className="space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-end">
                     <div>
