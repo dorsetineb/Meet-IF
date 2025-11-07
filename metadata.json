@@ -1,5 +1,5 @@
 {
-  "name": "Organizador de Reuniões IA",
+  "name": "Meet-IF",
   "description": "Um organizador de reuniões automático que utiliza IA para definir reuniões regulares e recorrentes com base em parâmetros como frequência, dias da semana, horários, pautas e intervalos.",
   "requestFramePermissions": []
 }
