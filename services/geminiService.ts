@@ -44,7 +44,9 @@ const buildPrompt = (settings: GeneralSettings, teams: Team[]): string => {
          - **Entre Dias da Semana:** Dentro de cada semana, distribua as reuniões de forma equilibrada entre os dias disponíveis. Evite concentrar todas as reuniões no início da semana (ex: Segunda e Terça). Utilize todos os dias permitidos.
          - **Dentro do Dia:** Para os dias que tiverem mais de uma reunião, tente agendar uma pela manhã e outra à tarde, se possível, para não sobrecarregar um período do dia.
       8. Respeite a frequência, os dias da semana e a janela de horários para TODAS as reuniões.
-      9. Assegure que haja o intervalo mínimo especificado entre reuniões. A regra do intervalo de almoço é ABSOLUTA e mais importante que todas as outras: NENHUMA reunião pode começar, terminar ou transcorrer dentro do período de almoço. Verifique cada reunião agendada para garantir o cumprimento estrito desta diretriz.
+      9. **REGRAS DE INTERVALO E ALMOÇO (CRÍTICAS E OBRIGATÓRIAS):** O cumprimento das regras a seguir é mais importante do que qualquer outra otimização de agenda (como agrupar reuniões). Se for necessário para cumprir estas regras, mova as reuniões para outros dias ou semanas.
+         - **Intervalo Entre Reuniões:** Deve haver um intervalo mínimo de ${settings.breakInterval} minutos entre o fim de uma reunião e o início da próxima no mesmo dia. Esta regra é ABSOLUTA.
+         - **Intervalo de Almoço:** A regra do intervalo de almoço é ainda mais rígida e ABSOLUTA. O período definido para o almoço é um bloco indisponível. Nenhuma reunião pode ser agendada dentro deste período, nem mesmo parcialmente.
       10. A data deve ser no formato AAAA-MM-DD e o horário no formato HH:mm.
       11. Em vez de gerar uma lista de projetos genéricos, o campo 'participantsInfo' deve ser um array de objetos, onde cada objeto contém 'participantName' e 'projectsCount', indicando quantos projetos aquele participante apresentará naquela reunião específica.
       12. O formato de saída deve ser um JSON array de objetos de reunião. Certifique-se de que a propriedade 'teamName' em cada objeto de reunião corresponde ao nome da equipe correta.
