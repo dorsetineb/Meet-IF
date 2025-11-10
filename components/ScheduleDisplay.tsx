@@ -1,5 +1,4 @@
-
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import type { Meeting, DayOfWeek, Frequency } from '../types';
 import { CalendarIcon } from './icons/CalendarIcon';
 import { ClockIcon } from './icons/ClockIcon';
@@ -9,6 +8,7 @@ interface ScheduleDisplayProps {
   isLoading: boolean;
   error: string | null;
   frequency: Frequency;
+  activeWeek: number;
 }
 
 const CalendarMeetingCard: React.FC<{ meeting: Meeting }> = ({ meeting }) => (
@@ -82,10 +82,7 @@ const WeekView: React.FC<{ meetings: Meeting[] }> = ({ meetings }) => {
 };
 
 
-export const ScheduleDisplay = React.forwardRef<HTMLDivElement, ScheduleDisplayProps>(({ schedule, isLoading, error, frequency }, ref) => {
-  // RULE OF HOOKS: All hooks must be called at the top level, before any conditional returns.
-  const [activeWeek, setActiveWeek] = useState(1);
-
+export const ScheduleDisplay = React.forwardRef<HTMLDivElement, ScheduleDisplayProps>(({ schedule, isLoading, error, frequency, activeWeek }, ref) => {
   const meetingsByWeek = useMemo(() => {
     if (!schedule || schedule.length === 0) {
       return {};
@@ -156,39 +153,15 @@ export const ScheduleDisplay = React.forwardRef<HTMLDivElement, ScheduleDisplayP
     );
   }
 
-  const numWeeks = frequency === 'mensal' ? 4 : (frequency === 'quinzenal' ? 2 : 1);
-  const weekNumbers = Array.from({ length: numWeeks }, (_, i) => i + 1);
   const showTabs = frequency !== 'semanal';
 
   return (
-    <div ref={ref} className="space-y-6">
-      {showTabs && (
-        <div>
-            <nav className="flex space-x-2" aria-label="Tabs">
-                {weekNumbers.map(weekNum => (
-                     <button
-                        key={weekNum}
-                        onClick={() => setActiveWeek(weekNum)}
-                        className={`${
-                            activeWeek === weekNum
-                            ? 'bg-primary-600 text-white shadow'
-                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        } whitespace-nowrap py-2 px-4 rounded-md font-medium text-xs transition-colors duration-200`}
-                    >
-                        Semana {weekNum}
-                    </button>
-                ))}
-            </nav>
-        </div>
+    <div ref={ref}>
+      {showTabs ? (
+          <WeekView meetings={meetingsByWeek[activeWeek] || []} />
+      ) : (
+          <WeekView meetings={meetingsByWeek[1] || []} />
       )}
-
-      <div>
-        {showTabs ? (
-            <WeekView meetings={meetingsByWeek[activeWeek] || []} />
-        ) : (
-            <WeekView meetings={meetingsByWeek[1] || []} />
-        )}
-      </div>
     </div>
   );
 });

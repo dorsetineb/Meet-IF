@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { TeamsPanel } from './components/TeamsPanel';
 import { GeneralSettingsPanel } from './components/GeneralSettingsPanel';
@@ -80,6 +79,8 @@ const App: React.FC = () => {
   const [isLunchModalOpen, setIsLunchModalOpen] = useState(false);
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
 
+  const [activeWeek, setActiveWeek] = useState(1);
+
   const scheduleRef = useRef<HTMLDivElement>(null);
 
   const handleAddNewTeam = () => {
@@ -123,6 +124,7 @@ const App: React.FC = () => {
     setIsLoading(true);
     setError(null);
     setSchedule([]);
+    setActiveWeek(1);
 
     try {
         if (teams.length === 0) {
@@ -180,6 +182,9 @@ const App: React.FC = () => {
     }
   };
 
+  const numWeeks = settings.frequency === 'mensal' ? 4 : (settings.frequency === 'quinzenal' ? 2 : 1);
+  const weekNumbers = Array.from({ length: numWeeks }, (_, i) => i + 1);
+  const showTabs = settings.frequency !== 'semanal';
 
   return (
     <div className="min-h-screen font-sans text-gray-800">
@@ -217,7 +222,25 @@ const App: React.FC = () => {
                 
                 <div className="mt-10 bg-white p-6 md:p-8 rounded-xl">
                     <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-xl font-bold text-gray-800">Agenda Proposta</h2>
+                        <div>
+                           {schedule.length > 0 && !isLoading && showTabs && (
+                                <nav className="flex space-x-2" aria-label="Tabs">
+                                    {weekNumbers.map(weekNum => (
+                                        <button
+                                            key={weekNum}
+                                            onClick={() => setActiveWeek(weekNum)}
+                                            className={`${
+                                                activeWeek === weekNum
+                                                ? 'bg-primary-600 text-white shadow'
+                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                            } whitespace-nowrap py-2 px-4 rounded-md font-medium text-xs transition-colors duration-200`}
+                                        >
+                                            Semana {weekNum}
+                                        </button>
+                                    ))}
+                                </nav>
+                           )}
+                        </div>
                         {schedule.length > 0 && !isLoading && (
                             <button
                                 onClick={handleExport}
@@ -235,6 +258,7 @@ const App: React.FC = () => {
                         isLoading={isLoading} 
                         error={error} 
                         frequency={settings.frequency}
+                        activeWeek={activeWeek}
                     />
                 </div>
             </div>
