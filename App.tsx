@@ -5,10 +5,9 @@ import { ScheduleDisplay } from './components/ScheduleDisplay';
 import { TeamModal } from './components/TeamModal';
 import { LunchBreakModal } from './components/LunchBreakModal';
 import { generateSchedule } from './services/geminiService';
+import { generateScheduleHTML } from './services/exportService';
 import type { GeneralSettings, Meeting, Team } from './types';
 import { ExportIcon } from './components/icons/ExportIcon';
-
-declare const html2canvas: any;
 
 const defaultSettings: GeneralSettings = {
     frequency: 'semanal',
@@ -80,8 +79,6 @@ const App: React.FC = () => {
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
 
   const [activeWeek, setActiveWeek] = useState(1);
-
-  const scheduleRef = useRef<HTMLDivElement>(null);
 
   const handleAddNewTeam = () => {
     setEditingTeam(null);
@@ -165,20 +162,20 @@ const App: React.FC = () => {
   }, [settings, teams]);
 
   const handleExport = () => {
-    if (scheduleRef.current) {
-        html2canvas(scheduleRef.current, {
-            useCORS: true,
-            scale: 2, // Higher scale for better quality
-            backgroundColor: '#f1f5f9' // Match the week view background
-        }).then((canvas: HTMLCanvasElement) => {
-            const link = document.createElement('a');
-            link.download = 'agenda-reunioes.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-        }).catch((err: Error) => {
-            console.error("Oops, something went wrong!", err);
-            setError("Falha ao exportar a agenda como imagem.");
-        });
+    try {
+        const htmlContent = generateScheduleHTML(schedule, settings);
+        const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = 'agenda-reunioes.html';
+        link.href = url;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    } catch (err) {
+        console.error("Oops, something went wrong during export!", err);
+        setError("Falha ao exportar a agenda como arquivo HTML.");
     }
   };
 
@@ -245,7 +242,7 @@ const App: React.FC = () => {
                             <button
                                 onClick={handleExport}
                                 className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-primary-600 bg-primary-100 border border-transparent rounded-md hover:bg-primary-200"
-                                aria-label="Exportar agenda como imagem"
+                                aria-label="Exportar agenda"
                             >
                                 <ExportIcon className="w-4 h-4" />
                                 Exportar
@@ -253,7 +250,6 @@ const App: React.FC = () => {
                         )}
                     </div>
                     <ScheduleDisplay 
-                        ref={scheduleRef}
                         schedule={schedule} 
                         isLoading={isLoading} 
                         error={error} 

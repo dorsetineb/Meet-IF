@@ -82,7 +82,7 @@ const WeekView: React.FC<{ meetings: Meeting[] }> = ({ meetings }) => {
 };
 
 
-export const ScheduleDisplay = React.forwardRef<HTMLDivElement, ScheduleDisplayProps>(({ schedule, isLoading, error, frequency, activeWeek }, ref) => {
+export const ScheduleDisplay: React.FC<ScheduleDisplayProps> = ({ schedule, isLoading, error, frequency, activeWeek }) => {
   const meetingsByWeek = useMemo(() => {
     if (!schedule || schedule.length === 0) {
       return {};
@@ -156,7 +156,7 @@ export const ScheduleDisplay = React.forwardRef<HTMLDivElement, ScheduleDisplayP
   const showTabs = frequency !== 'semanal';
 
   return (
-    <div ref={ref}>
+    <div>
       {showTabs ? (
           <WeekView meetings={meetingsByWeek[activeWeek] || []} />
       ) : (
@@ -164,6 +164,4 @@ export const ScheduleDisplay = React.forwardRef<HTMLDivElement, ScheduleDisplayP
       )}
     </div>
   );
-});
-
-ScheduleDisplay.displayName = 'ScheduleDisplay';
+};
