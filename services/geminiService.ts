@@ -147,9 +147,12 @@ export const generateSchedule = async (settings: GeneralSettings, teams: Team[])
     return validatedSchedule;
   } catch (error) {
     console.error("Erro ao gerar agenda com Gemini:", error);
-    if (error instanceof Error) {
-        throw new Error(`Falha ao gerar a agenda: ${error.message}`);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+
+    if (errorMessage.includes("503") || errorMessage.includes("overloaded") || errorMessage.includes("UNAVAILABLE")) {
+      throw new Error(`GEMINI_OVERLOADED: ${errorMessage}`);
     }
-    throw new Error("Ocorreu um erro desconhecido ao se comunicar com a IA.");
+    
+    throw new Error(`Falha ao gerar a agenda: ${errorMessage}`);
   }
 };

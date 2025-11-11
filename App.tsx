@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { TeamsPanel } from './components/TeamsPanel';
 import { GeneralSettingsPanel } from './components/GeneralSettingsPanel';
@@ -150,7 +151,7 @@ const App: React.FC = () => {
             e.message.includes("API_KEY environment variable not set")
         ) {
             setError("Falha na autenticação: A chave da API é inválida ou não foi configurada. Verifique as variáveis de ambiente na sua plataforma de hospedagem (ex: Vercel) e faça o deploy novamente.");
-        } else if (e.message.includes("503") || e.message.includes("overloaded") || e.message.includes("UNAVAILABLE")) {
+        } else if (e.message.startsWith("GEMINI_OVERLOADED:")) {
             setError("Ocorreu um erro ao comunicar com a IA, que parece estar sobrecarregada. Por favor, tente novamente em alguns instantes.");
         } else {
             setError(e.message);
