@@ -145,16 +145,19 @@ const App: React.FC = () => {
       setSchedule(newSchedule);
     } catch (e) {
       if (e instanceof Error) {
+        const message = e.message;
+        // A lógica foi reordenada para priorizar erros de configuração/autenticação,
+        // que são a causa mais provável de falhas em ambientes de implantação como o Vercel.
         if (
-            e.message.includes("API key not valid") ||
-            e.message.includes("API_KEY_INVALID") ||
-            e.message.includes("API_KEY environment variable not set")
+            message.includes("API key not valid") ||
+            message.includes("API_KEY_INVALID") ||
+            message.includes("API_KEY environment variable not set")
         ) {
             setError("Falha na autenticação: A chave da API é inválida ou não foi configurada. Verifique as variáveis de ambiente na sua plataforma de hospedagem (ex: Vercel) e faça o deploy novamente.");
-        } else if (e.message.startsWith("GEMINI_OVERLOADED:")) {
-            setError("Ocorreu um erro ao comunicar com a IA. Em ambientes como o Vercel, isso geralmente ocorre por uma falha na configuração da chave de API. Verifique se a variável de ambiente API_KEY está corretamente configurada no seu projeto Vercel e tente novamente.");
+        } else if (message.includes("503") || message.includes("overloaded") || message.includes("UNAVAILABLE")) {
+            setError("Ocorreu um erro ao comunicar com a IA, que parece estar sobrecarregada. Por favor, tente novamente em alguns instantes.");
         } else {
-            setError(e.message);
+            setError(message);
         }
       } else {
         setError('Ocorreu um erro inesperado.');

@@ -147,12 +147,10 @@ export const generateSchedule = async (settings: GeneralSettings, teams: Team[])
     return validatedSchedule;
   } catch (error) {
     console.error("Erro ao gerar agenda com Gemini:", error);
-    const errorMessage = error instanceof Error ? error.message : String(error);
-
-    if (errorMessage.includes("503") || errorMessage.includes("overloaded") || errorMessage.includes("UNAVAILABLE")) {
-      throw new Error(`GEMINI_OVERLOADED: ${errorMessage}`);
-    }
-    
-    throw new Error(`Falha ao gerar a agenda: ${errorMessage}`);
+    // Re-lança o erro original para que a camada de UI (App.tsx) possa
+    // fazer uma análise mais detalhada e exibir a mensagem correta.
+    // Isso evita a classificação incorreta de erros de autenticação como
+    // sobrecarga do serviço.
+    throw error;
   }
 };
