@@ -152,7 +152,7 @@ const App: React.FC = () => {
         ) {
             setError("Falha na autenticação: A chave da API é inválida ou não foi configurada. Verifique as variáveis de ambiente na sua plataforma de hospedagem (ex: Vercel) e faça o deploy novamente.");
         } else if (e.message.startsWith("GEMINI_OVERLOADED:")) {
-            setError("Ocorreu um erro ao comunicar com a IA, que parece estar sobrecarregada. Por favor, tente novamente em alguns instantes.");
+            setError("Ocorreu um erro ao comunicar com a IA. Em ambientes como o Vercel, isso geralmente ocorre por uma falha na configuração da chave de API. Verifique se a variável de ambiente API_KEY está corretamente configurada no seu projeto Vercel e tente novamente.");
         } else {
             setError(e.message);
         }
