@@ -7,7 +7,7 @@ import { TeamModal } from './components/TeamModal';
 import { LunchBreakModal } from './components/LunchBreakModal';
 import { generateSchedule } from './services/geminiService';
 import { generateScheduleHTML } from './services/exportService';
-import type { GeneralSettings, Meeting, Team } from './types';
+import type { GeneralSettings, Meeting, Team, DayOfWeek } from './types';
 import { ExportIcon } from './components/icons/ExportIcon';
 
 const defaultSettings: GeneralSettings = {
@@ -21,6 +21,8 @@ const defaultSettings: GeneralSettings = {
     breakInterval: 10,
     maxProjectsPerMeeting: 8,
 };
+
+const weekDays: DayOfWeek[] = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
 const App: React.FC = () => {
     const [settings, setSettings] = useState<GeneralSettings>(() => {
@@ -203,7 +205,44 @@ const App: React.FC = () => {
     }
   };
 
-  const numWeeks = settings.frequency === 'mensal' ? 4 : (settings.frequency === 'quinzenal' ? 2 : 1);
+    const handleMeetingDrop = useCallback((meetingId: string, newDate: string) => {
+        setSchedule(currentSchedule => {
+            return currentSchedule.map(m => {
+                if (m.id === meetingId) {
+                    return { ...m, date: newDate };
+                }
+                return m;
+            });
+        });
+    }, []);
+
+    const handleTimeChange = useCallback((meetingId: string, newStartTime: string) => {
+        setSchedule(currentSchedule => {
+            const newSchedule = [...currentSchedule];
+            const meetingIndex = newSchedule.findIndex(m => m.id === meetingId);
+            if (meetingIndex === -1) return currentSchedule;
+
+            const meeting = newSchedule[meetingIndex];
+            const durationInMinutes = meeting.totalProjectsInMeeting * settings.projectDuration;
+
+            const [hours, minutes] = newStartTime.split(':').map(Number);
+            const startDate = new Date();
+            startDate.setHours(hours, minutes, 0, 0);
+
+            const endDate = new Date(startDate.getTime() + durationInMinutes * 60000);
+            const newEndTime = `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`;
+            
+            newSchedule[meetingIndex] = {
+                ...meeting,
+                startTime: newStartTime,
+                endTime: newEndTime,
+            };
+            
+            return newSchedule;
+        });
+    }, [settings.projectDuration]);
+
+  const numWeeks = settings.frequency === 'mensal' ? 4 : (settings.frequency === 'quinzanal' ? 2 : 1);
   const weekNumbers = Array.from({ length: numWeeks }, (_, i) => i + 1);
   const showTabs = settings.frequency !== 'semanal';
 
@@ -242,43 +281,46 @@ const App: React.FC = () => {
                 </div>
                 
                 <div className="mt-10 bg-white p-6 md:p-8 rounded-xl">
-                    <div className="flex justify-between items-center mb-6">
-                        <div>
-                           {schedule.length > 0 && !isLoading && showTabs && (
-                                <nav className="flex space-x-2" aria-label="Tabs">
-                                    {weekNumbers.map(weekNum => (
-                                        <button
-                                            key={weekNum}
-                                            onClick={() => setActiveWeek(weekNum)}
-                                            className={`${
-                                                activeWeek === weekNum
-                                                ? 'bg-primary-600 text-white shadow'
-                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                            } whitespace-nowrap py-2 px-4 rounded-md font-medium text-xs transition-colors duration-200`}
-                                        >
-                                            Semana {weekNum}
-                                        </button>
-                                    ))}
-                                </nav>
-                           )}
+                    {schedule.length > 0 && !isLoading && (
+                        <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
+                            <h2 className="text-xl font-bold text-gray-800">Sugestão de agenda</h2>
+                            <div className="flex items-center gap-4">
+                               {showTabs && (
+                                    <nav className="flex space-x-2" aria-label="Tabs">
+                                        {weekNumbers.map(weekNum => (
+                                            <button
+                                                key={weekNum}
+                                                onClick={() => setActiveWeek(weekNum)}
+                                                className={`${
+                                                    activeWeek === weekNum
+                                                    ? 'bg-primary-600 text-white shadow'
+                                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                                } whitespace-nowrap py-2 px-4 rounded-md font-medium text-xs transition-colors duration-200`}
+                                            >
+                                                Semana {weekNum}
+                                            </button>
+                                        ))}
+                                    </nav>
+                               )}
+                               <button
+                                    onClick={handleExport}
+                                    className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-primary-600 bg-primary-100 border border-transparent rounded-md hover:bg-primary-200"
+                                    aria-label="Exportar agenda"
+                                >
+                                    <ExportIcon className="w-4 h-4" />
+                                    Exportar
+                                </button>
+                            </div>
                         </div>
-                        {schedule.length > 0 && !isLoading && (
-                            <button
-                                onClick={handleExport}
-                                className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-primary-600 bg-primary-100 border border-transparent rounded-md hover:bg-primary-200"
-                                aria-label="Exportar agenda"
-                            >
-                                <ExportIcon className="w-4 h-4" />
-                                Exportar
-                            </button>
-                        )}
-                    </div>
+                    )}
                     <ScheduleDisplay 
                         schedule={schedule} 
                         isLoading={isLoading} 
                         error={error} 
                         frequency={settings.frequency}
                         activeWeek={activeWeek}
+                        onMeetingDrop={handleMeetingDrop}
+                        onTimeChange={handleTimeChange}
                     />
                 </div>
             </div>
