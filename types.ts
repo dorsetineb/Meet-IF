@@ -1,5 +1,6 @@
 export type Frequency = 'semanal' | 'quinzenal' | 'mensal';
 export type DayOfWeek = 'Segunda' | 'Terça' | 'Quarta' | 'Quinta' | 'Sexta' | 'Sábado' | 'Domingo';
+export type TeamConfigType = 'participants' | 'projectsOnly';
 
 export interface Participant {
   id: string;
@@ -10,7 +11,9 @@ export interface Participant {
 export interface Team {
   id:string;
   name: string;
+  configType: TeamConfigType;
   participants: Participant[];
+  totalProjects?: number;
 }
 
 export interface GeneralSettings {
@@ -36,4 +39,5 @@ export interface Meeting {
     participantName: string;
     projectsCount: number;
   }[];
+  totalProjectsInMeeting: number;
 }

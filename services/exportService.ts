@@ -2,19 +2,24 @@ import type { Meeting, GeneralSettings, DayOfWeek } from '../types';
 
 const weekDays: DayOfWeek[] = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
 
-const generateMeetingCardHTML = (meeting: Meeting): string => `
+const generateMeetingCardHTML = (meeting: Meeting): string => {
+  const participantsHTML = meeting.participantsInfo && meeting.participantsInfo.length > 0
+    ? `<ul class="space-y-2">
+        ${meeting.participantsInfo.map(p => `
+          <li>
+            <p class="text-[11px] font-medium text-gray-800">${p.participantName}</p>
+            <p class="text-[11px] text-gray-500">${p.projectsCount} ${p.projectsCount > 1 ? 'projetos' : 'projeto'}</p>
+          </li>
+        `).join('')}
+      </ul>`
+    : `<p class="text-xs text-center text-gray-600 py-2">${meeting.totalProjectsInMeeting} ${meeting.totalProjectsInMeeting === 1 ? 'projeto' : 'projetos'} na pauta</p>`;
+
+  return `
   <div class="bg-white rounded-lg p-3 shadow border border-gray-200 flex flex-col justify-between break-inside-avoid">
     <div>
       <p class="font-bold text-xs text-primary-800">${meeting.title}</p>
       <div class="border-t pt-2 mt-2">
-         <ul class="space-y-2">
-            ${meeting.participantsInfo.map(p => `
-              <li>
-                <p class="text-[11px] font-medium text-gray-800">${p.participantName}</p>
-                <p class="text-[11px] text-gray-500">${p.projectsCount} ${p.projectsCount > 1 ? 'projetos' : 'projeto'}</p>
-              </li>
-            `).join('')}
-          </ul>
+        ${participantsHTML}
       </div>
     </div>
     <div class="mt-3 bg-gray-100 rounded-md py-1 px-2 flex items-center justify-center">
@@ -23,6 +28,7 @@ const generateMeetingCardHTML = (meeting: Meeting): string => `
     </div>
   </div>
 `;
+}
 
 const generateWeekViewHTML = (meetings: Meeting[], weekNumber: number, showWeekTitle: boolean): string => {
   const grouped: { [key in DayOfWeek]?: Meeting[] } = {};

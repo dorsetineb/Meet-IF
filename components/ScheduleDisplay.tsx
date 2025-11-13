@@ -16,14 +16,20 @@ const CalendarMeetingCard: React.FC<{ meeting: Meeting }> = ({ meeting }) => (
     <div>
       <p className="font-bold text-xs text-primary-800 truncate">{meeting.title}</p>
       <div className="border-t pt-2 mt-2">
-         <ul className="space-y-2">
-            {meeting.participantsInfo.map((p, index) => (
-              <li key={index}>
-                <p className="text-[11px] font-medium text-gray-800 truncate">{p.participantName}</p>
-                <p className="text-[11px] text-gray-500">{p.projectsCount} {p.projectsCount > 1 ? 'projetos' : 'projeto'}</p>
-              </li>
-            ))}
-          </ul>
+         {meeting.participantsInfo && meeting.participantsInfo.length > 0 ? (
+            <ul className="space-y-2">
+                {meeting.participantsInfo.map((p, index) => (
+                <li key={index}>
+                    <p className="text-[11px] font-medium text-gray-800 truncate">{p.participantName}</p>
+                    <p className="text-[11px] text-gray-500">{p.projectsCount} {p.projectsCount > 1 ? 'projetos' : 'projeto'}</p>
+                </li>
+                ))}
+            </ul>
+         ) : (
+            <p className="text-xs text-center text-gray-600 py-2">
+                {meeting.totalProjectsInMeeting} {meeting.totalProjectsInMeeting === 1 ? 'projeto' : 'projetos'} na pauta
+            </p>
+         )}
       </div>
     </div>
     <div className="mt-3 bg-gray-100 rounded-md py-1 px-2 flex items-center justify-center">

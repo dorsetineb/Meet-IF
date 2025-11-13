@@ -142,6 +142,24 @@ const App: React.FC = () => {
             throw new Error("O horário de término do almoço deve ser posterior ao horário de início.");
         }
       const newSchedule = await generateSchedule(settings, teams);
+
+      // Validação Pós-Geração: Verifica se todas as equipes foram agendadas.
+      const teamsWithProjects = teams.filter(team => {
+        const projectCount = team.configType === 'projectsOnly' 
+            ? team.totalProjects ?? 0 
+            : team.participants.reduce((sum, p) => sum + (p.projectsCount || 0), 0);
+        return projectCount > 0;
+      });
+
+      const scheduledTeamNames = new Set(newSchedule.map(meeting => meeting.teamName));
+      const allTeamNamesWithProjects = teamsWithProjects.map(team => team.name);
+      
+      const missingTeams = allTeamNamesWithProjects.filter(name => !scheduledTeamNames.has(name));
+
+      if (missingTeams.length > 0) {
+        throw new Error(`A IA não conseguiu agendar todas as equipes. As seguintes equipes ficaram de fora: ${missingTeams.join(', ')}. Tente novamente ou ajuste as configurações para criar mais espaço na agenda (ex: adicione mais dias, aumente a janela de horários).`);
+      }
+      
       setSchedule(newSchedule);
     } catch (e) {
       if (e instanceof Error) {

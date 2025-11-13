@@ -4,6 +4,9 @@ import { GeneralSettings, Team, Meeting } from '../types';
 
 const buildPrompt = (settings: GeneralSettings, teams: Team[]): string => {
   const teamsDescription = teams.map(team => {
+      if (team.configType === 'projectsOnly') {
+          return `- Equipe: ${team.name} (Total de projetos: ${team.totalProjects || 0})`;
+      }
       const totalProjects = team.participants.reduce((sum, p) => sum + p.projectsCount, 0);
       const participantsDescription = team.participants.map(p => `${p.name} (${p.projectsCount} projetos)`).join(', ');
       return `- Equipe: ${team.name} (Total de projetos: ${totalProjects}, Participantes: ${participantsDescription})`;
@@ -32,7 +35,7 @@ const buildPrompt = (settings: GeneralSettings, teams: Team[]): string => {
       Instruções:
       1. Para cada equipe, verifique o número total de projetos.
       2. Calcule o número de reuniões necessárias para cada equipe dividindo o total de projetos pelo "Máximo de projetos por reunião" e arredondando para cima. Distribua os projetos o mais uniformemente possível entre as reuniões necessárias. Por exemplo, se uma equipe tem 10 projetos e o máximo é 8, o ideal é criar duas reuniões com 5 projetos cada.
-      3. Ao atribuir projetos, priorize manter todos os projetos de um mesmo participante dentro da mesma reunião, a menos que seja impossível devido ao limite de projetos.
+      3. Ao atribuir projetos para equipes com participantes, priorize manter todos os projetos de um mesmo participante dentro da mesma reunião, a menos que seja impossível devido ao limite de projetos.
       4. O título da reunião deve ser o nome da equipe. Se uma equipe precisar de múltiplas reuniões, adicione um sufixo numérico para diferenciá-las (ex: "Equipe Alpha (1/2)" e "Equipe Alpha (2/2)"). Não adicione prefixos como "Sincronização".
       5. **REGRA DE ESPAÇAMENTO OBRIGATÓRIA (MUITO IMPORTANTE):** Se uma equipe tiver múltiplas reuniões (ex: Reunião A (1/2) e Reunião A (2/2)), essas reuniões NUNCA devem ocorrer no mesmo dia.
          - A prioridade máxima é agendá-las em dias diferentes.
@@ -48,8 +51,10 @@ const buildPrompt = (settings: GeneralSettings, teams: Team[]): string => {
          - **Intervalo Entre Reuniões:** Deve haver um intervalo mínimo de ${settings.breakInterval} minutos entre o fim de uma reunião e o início da próxima no mesmo dia. Esta regra é ABSOLUTA.
          - **Intervalo de Almoço:** A regra do intervalo de almoço é ainda mais rígida e ABSOLUTA. O período definido para o almoço é um bloco indisponível. Nenhuma reunião pode ser agendada dentro deste período, nem mesmo parcialmente.
       10. A data deve ser no formato AAAA-MM-DD e o horário no formato HH:mm.
-      11. Em vez de gerar uma lista de projetos genéricos, o campo 'participantsInfo' deve ser um array de objetos, onde cada objeto contém 'participantName' e 'projectsCount', indicando quantos projetos aquele participante apresentará naquela reunião específica.
-      12. O formato de saída deve ser um JSON array de objetos de reunião. Certifique-se de que a propriedade 'teamName' em cada objeto de reunião corresponde ao nome da equipe correta.
+      11. Para equipes com participantes definidos, o campo 'participantsInfo' deve ser um array de objetos, onde cada objeto contém 'participantName' e 'projectsCount', indicando quantos projetos aquele participante apresentará naquela reunião específica. Para equipes sem participantes definidos, este campo deve ser um array vazio.
+      12. **REGRA CRÍTICA:** Para TODAS as reuniões, você DEVE calcular e incluir o número total de projetos agendados para aquela reunião específica no campo 'totalProjectsInMeeting'.
+      13. **VERIFICAÇÃO FINAL OBRIGATÓRIA:** Antes de finalizar a resposta, revise sua agenda para garantir que TODAS as equipes com projetos listadas em 'Equipes para Agendar' tenham pelo menos uma reunião agendada. É um erro CRÍTICO omitir qualquer equipe.
+      14. O formato de saída deve ser um JSON array de objetos de reunião. Certifique-se de que a propriedade 'teamName' em cada objeto de reunião corresponde ao nome da equipe correta.
   `;
 };
 
@@ -76,8 +81,12 @@ const meetingSchema = {
         },
         description: 'Lista de participantes e quantos projetos cada um tem na reunião'
       },
+      totalProjectsInMeeting: {
+          type: Type.NUMBER,
+          description: 'O número total de projetos discutidos nesta reunião específica.'
+      },
     },
-    required: ['id', 'teamName', 'title', 'date', 'startTime', 'endTime', 'participantsInfo'],
+    required: ['id', 'teamName', 'title', 'date', 'startTime', 'endTime', 'participantsInfo', 'totalProjectsInMeeting'],
   },
 };
 
