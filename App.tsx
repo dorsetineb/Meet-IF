@@ -242,7 +242,7 @@ const App: React.FC = () => {
         });
     }, [settings.projectDuration]);
 
-  const numWeeks = settings.frequency === 'mensal' ? 4 : (settings.frequency === 'quinzanal' ? 2 : 1);
+  const numWeeks = settings.frequency === 'mensal' ? 4 : (settings.frequency === 'quinzenal' ? 2 : 1);
   const weekNumbers = Array.from({ length: numWeeks }, (_, i) => i + 1);
   const showTabs = settings.frequency !== 'semanal';
 
