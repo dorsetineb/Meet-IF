@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import type { Team, Participant, TeamConfigType } from '../types';
 import { PlusIcon } from './icons/PlusIcon';
@@ -19,7 +18,7 @@ const emptyParticipant = (): Participant => ({
 
 export const TeamModal: React.FC<TeamModalProps> = ({ team, onSave, onClose }) => {
   const [name, setName] = useState('');
-  const [configType, setConfigType] = useState<TeamConfigType>('participants');
+  const [configType, setConfigType] = useState<TeamConfigType>('projectsOnly');
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [totalProjects, setTotalProjects] = useState<number>(1);
   const [error, setError] = useState<string | null>(null);
@@ -27,12 +26,12 @@ export const TeamModal: React.FC<TeamModalProps> = ({ team, onSave, onClose }) =
   useEffect(() => {
     if (team) {
       setName(team.name);
-      setConfigType(team.configType || 'participants');
-      setParticipants(team.participants || [emptyParticipant()]);
+      setConfigType(team.configType || 'projectsOnly');
+      setParticipants(team.participants && team.participants.length > 0 ? team.participants : [emptyParticipant()]);
       setTotalProjects(team.totalProjects || 1);
     } else {
       setName('');
-      setConfigType('participants');
+      setConfigType('projectsOnly');
       setParticipants([emptyParticipant()]);
       setTotalProjects(1);
     }
@@ -115,8 +114,8 @@ export const TeamModal: React.FC<TeamModalProps> = ({ team, onSave, onClose }) =
                     onChange={(e) => setConfigType(e.target.value as TeamConfigType)}
                     className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-sm"
                 >
-                    <option value="participants">Participantes e projetos</option>
                     <option value="projectsOnly">Apenas projetos</option>
+                    <option value="participants">Participantes e projetos</option>
                 </select>
             </div>
             
