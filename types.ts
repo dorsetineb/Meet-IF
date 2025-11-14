@@ -40,4 +40,5 @@ export interface Meeting {
     projectsCount: number;
   }[];
   totalProjectsInMeeting: number;
+  isCustom?: boolean;
 }

@@ -1,10 +1,10 @@
-
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { TeamsPanel } from './components/TeamsPanel';
 import { GeneralSettingsPanel } from './components/GeneralSettingsPanel';
 import { ScheduleDisplay } from './components/ScheduleDisplay';
 import { TeamModal } from './components/TeamModal';
 import { LunchBreakModal } from './components/LunchBreakModal';
+import { MeetingPocket } from './components/MeetingPocket';
 import { generateSchedule } from './services/geminiService';
 import { generateScheduleHTML } from './services/exportService';
 import type { GeneralSettings, Meeting, Team, DayOfWeek } from './types';
@@ -21,8 +21,6 @@ const defaultSettings: GeneralSettings = {
     breakInterval: 10,
     maxProjectsPerMeeting: 8,
 };
-
-const weekDays: DayOfWeek[] = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
 const App: React.FC = () => {
     const [settings, setSettings] = useState<GeneralSettings>(() => {
@@ -82,6 +80,8 @@ const App: React.FC = () => {
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
 
   const [activeWeek, setActiveWeek] = useState(1);
+  const [heldMeetings, setHeldMeetings] = useState<Meeting[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAddNewTeam = () => {
     setEditingTeam(null);
@@ -125,6 +125,7 @@ const App: React.FC = () => {
     setError(null);
     setSchedule([]);
     setActiveWeek(1);
+    setHeldMeetings([]);
 
     try {
         if (teams.length === 0) {
@@ -145,7 +146,6 @@ const App: React.FC = () => {
         }
       const newSchedule = await generateSchedule(settings, teams);
 
-      // Validação Pós-Geração: Verifica se todas as equipes foram agendadas.
       const teamsWithProjects = teams.filter(team => {
         const projectCount = team.configType === 'projectsOnly' 
             ? team.totalProjects ?? 0 
@@ -166,8 +166,6 @@ const App: React.FC = () => {
     } catch (e) {
       if (e instanceof Error) {
         const message = e.message;
-        // A lógica foi reordenada para priorizar erros de configuração/autenticação,
-        // que são a causa mais provável de falhas em ambientes de implantação como o Vercel.
         if (
             message.includes("API key not valid") ||
             message.includes("API_KEY_INVALID") ||
@@ -204,17 +202,60 @@ const App: React.FC = () => {
         setError("Falha ao exportar a agenda como arquivo HTML.");
     }
   };
-
-    const handleMeetingDrop = useCallback((meetingId: string, newDate: string) => {
-        setSchedule(currentSchedule => {
-            return currentSchedule.map(m => {
-                if (m.id === meetingId) {
-                    return { ...m, date: newDate };
-                }
-                return m;
+    
+    const handleMeetingDrop = useCallback((dragData: { source: string; meetingId?: string }, newDate: string) => {
+        if (dragData.source === 'calendar' && dragData.meetingId) {
+             setSchedule(currentSchedule => {
+                return currentSchedule.map(m => {
+                    if (m.id === dragData.meetingId) {
+                        return { ...m, date: newDate };
+                    }
+                    return m;
+                });
             });
-        });
-    }, []);
+        } else if (dragData.source === 'pocket' && dragData.meetingId) {
+            const meetingToMove = heldMeetings.find(m => m.id === dragData.meetingId);
+            if (meetingToMove) {
+                const newMeeting = { ...meetingToMove, date: newDate };
+                setSchedule(currentSchedule => [...currentSchedule, newMeeting]);
+                setHeldMeetings(current => current.filter(m => m.id !== dragData.meetingId));
+            }
+        } else if (dragData.source === 'pocket-free-meeting') {
+            const durationInMinutes = 60; // Default to 1 hour
+            const startTime = '09:00';
+            const [hours, minutes] = startTime.split(':').map(Number);
+            const startDate = new Date();
+            startDate.setHours(hours, minutes, 0, 0);
+            const endDate = new Date(startDate.getTime() + durationInMinutes * 60000);
+            const endTime = `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`;
+
+            const newMeeting: Meeting = {
+                id: crypto.randomUUID(),
+                teamName: 'Nova Reunião',
+                title: 'Nova Reunião',
+                date: newDate,
+                startTime,
+                endTime,
+                participantsInfo: [],
+                totalProjectsInMeeting: 0,
+                isCustom: true,
+            };
+            setSchedule(currentSchedule => [...currentSchedule, newMeeting]);
+        }
+    }, [heldMeetings, settings.projectDuration]);
+
+    const handleDropOnPocket = useCallback((dragData: { source: string; meetingId?: string }) => {
+        if (dragData.source === 'calendar' && dragData.meetingId) {
+            if (heldMeetings.length >= 3) return;
+
+            const meetingToHold = schedule.find(m => m.id === dragData.meetingId);
+            if (meetingToHold) {
+                setHeldMeetings(current => [...current, meetingToHold]);
+                setSchedule(current => current.filter(m => m.id !== dragData.meetingId));
+            }
+        }
+    }, [schedule, heldMeetings]);
+
 
     const handleTimeChange = useCallback((meetingId: string, newStartTime: string) => {
         setSchedule(currentSchedule => {
@@ -242,6 +283,78 @@ const App: React.FC = () => {
         });
     }, [settings.projectDuration]);
 
+    const handleCustomTimeChange = useCallback((meetingId: string, newStartTime: string, newEndTime: string) => {
+        setSchedule(currentSchedule => {
+            return currentSchedule.map(m => {
+                if (m.id === meetingId) {
+                    return { ...m, startTime: newStartTime, endTime: newEndTime };
+                }
+                return m;
+            });
+        });
+    }, []);
+
+    const handleTitleChange = useCallback((meetingId: string, newTitle: string) => {
+        setSchedule(currentSchedule => {
+            return currentSchedule.map(m => {
+                if (m.id === meetingId) {
+                    return { ...m, title: newTitle, teamName: newTitle };
+                }
+                return m;
+            });
+        });
+    }, []);
+
+    const handleExportConfig = () => {
+        const config = { settings, teams };
+        const dataStr = JSON.stringify(config, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = 'meet-if-config.json';
+        link.href = url;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
+
+    const handleImportConfig = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const text = e.target?.result;
+                if (typeof text !== 'string') throw new Error("File content is not a string");
+                
+                const importedConfig = JSON.parse(text);
+                if (importedConfig.settings && importedConfig.teams) {
+                    setSettings(importedConfig.settings);
+                    setTeams(importedConfig.teams);
+                    alert("Configurações importadas com sucesso!");
+                } else {
+                    throw new Error("Arquivo de configuração inválido.");
+                }
+            } catch (err) {
+                console.error("Erro ao importar configuração:", err);
+                alert("Falha ao importar o arquivo. Verifique se o arquivo está no formato correto.");
+            }
+        };
+        reader.onerror = () => {
+            alert("Erro ao ler o arquivo.");
+        };
+        reader.readAsText(file);
+
+        // Reset file input value to allow re-uploading the same file
+        event.target.value = '';
+    };
+
   const numWeeks = settings.frequency === 'mensal' ? 4 : (settings.frequency === 'quinzenal' ? 2 : 1);
   const weekNumbers = Array.from({ length: numWeeks }, (_, i) => i + 1);
   const showTabs = settings.frequency !== 'semanal';
@@ -263,6 +376,15 @@ const App: React.FC = () => {
                     settings={settings}
                     setSettings={setSettings}
                     onLunchSettingsClick={handleOpenLunchModal}
+                    onExportConfig={handleExportConfig}
+                    onImportConfig={handleImportConfig}
+                />
+                 <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept="application/json"
+                    className="hidden"
                 />
                 <div className="mt-8">
                     <button
@@ -281,11 +403,11 @@ const App: React.FC = () => {
                 </div>
                 
                 <div className="mt-10 bg-white p-6 md:p-8 rounded-xl">
-                    {schedule.length > 0 && !isLoading && (
+                    {(schedule.length > 0 || heldMeetings.length > 0) && !isLoading && (
                         <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
                             <h2 className="text-xl font-bold text-gray-800">Sugestão de agenda</h2>
                             <div className="flex items-center gap-4">
-                               {showTabs && (
+                               {showTabs && schedule.length > 0 && (
                                     <nav className="flex space-x-2" aria-label="Tabs">
                                         {weekNumbers.map(weekNum => (
                                             <button
@@ -304,11 +426,12 @@ const App: React.FC = () => {
                                )}
                                <button
                                     onClick={handleExport}
-                                    className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-primary-600 bg-primary-100 border border-transparent rounded-md hover:bg-primary-200"
-                                    aria-label="Exportar agenda"
+                                    disabled={schedule.length === 0}
+                                    className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-primary-600 bg-primary-100 border border-transparent rounded-md hover:bg-primary-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    aria-label="Exportar agenda visual como HTML"
                                 >
                                     <ExportIcon className="w-4 h-4" />
-                                    Exportar
+                                    Exportar Agenda
                                 </button>
                             </div>
                         </div>
@@ -321,7 +444,16 @@ const App: React.FC = () => {
                         activeWeek={activeWeek}
                         onMeetingDrop={handleMeetingDrop}
                         onTimeChange={handleTimeChange}
+                        onCustomTimeChange={handleCustomTimeChange}
+                        onTitleChange={handleTitleChange}
+                        heldMeetings={heldMeetings}
                     />
+                    {(schedule.length > 0 || heldMeetings.length > 0) && !isLoading && (
+                        <MeetingPocket 
+                            heldMeetings={heldMeetings}
+                            onDropOnPocket={handleDropOnPocket}
+                        />
+                    )}
                 </div>
             </div>
         </div>

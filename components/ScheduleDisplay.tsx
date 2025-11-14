@@ -1,5 +1,4 @@
-
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useRef, useEffect, useCallback } from 'react';
 import type { Meeting, DayOfWeek, Frequency } from '../types';
 import { CalendarIcon } from './icons/CalendarIcon';
 import { ClockIcon } from './icons/ClockIcon';
@@ -10,31 +9,84 @@ interface ScheduleDisplayProps {
   error: string | null;
   frequency: Frequency;
   activeWeek: number;
-  onMeetingDrop: (meetingId: string, newDate: string) => void;
+  onMeetingDrop: (dragData: { source: string; meetingId?: string }, newDate: string) => void;
   onTimeChange: (meetingId: string, newStartTime: string) => void;
+  onCustomTimeChange: (meetingId: string, newStartTime: string, newEndTime: string) => void;
+  onTitleChange: (meetingId: string, newTitle: string) => void;
+  heldMeetings: Meeting[];
 }
 
-const CalendarMeetingCard: React.FC<{ meeting: Meeting, onTimeChange: (meetingId: string, newStartTime: string) => void }> = ({ meeting, onTimeChange }) => {
+const CalendarMeetingCard: React.FC<{ 
+    meeting: Meeting, 
+    onTimeChange: (meetingId: string, newStartTime: string) => void,
+    onCustomTimeChange: (meetingId: string, newStartTime: string, newEndTime: string) => void,
+    onTitleChange: (meetingId: string, newTitle: string) => void 
+}> = ({ meeting, onTimeChange, onCustomTimeChange, onTitleChange }) => {
     const [isEditingTime, setIsEditingTime] = useState(false);
     const [newStartTime, setNewStartTime] = useState(meeting.startTime);
+    const [newEndTime, setNewEndTime] = useState(meeting.endTime);
+    const [isEditingTitle, setIsEditingTitle] = useState(false);
+    const [newTitle, setNewTitle] = useState(meeting.title);
+    const timeEditContainerRef = useRef<HTMLDivElement>(null);
 
-    const handleTimeSave = () => {
-        if (newStartTime !== meeting.startTime) {
-            onTimeChange(meeting.id, newStartTime);
+    const handleTimeSave = useCallback(() => {
+        if (meeting.isCustom) {
+            if (newStartTime !== meeting.startTime || newEndTime !== meeting.endTime) {
+                if (new Date(`1970-01-01T${newEndTime}`) > new Date(`1970-01-01T${newStartTime}`)) {
+                    onCustomTimeChange(meeting.id, newStartTime, newEndTime);
+                } else {
+                    setNewStartTime(meeting.startTime);
+                    setNewEndTime(meeting.endTime);
+                }
+            }
+        } else {
+            if (newStartTime !== meeting.startTime) {
+                onTimeChange(meeting.id, newStartTime);
+            }
         }
         setIsEditingTime(false);
+    }, [meeting, newStartTime, newEndTime, onTimeChange, onCustomTimeChange]);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (isEditingTime && timeEditContainerRef.current && !timeEditContainerRef.current.contains(event.target as Node)) {
+                handleTimeSave();
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isEditingTime, handleTimeSave]);
+
+    const handleTitleSave = () => {
+        if (newTitle.trim() && newTitle !== meeting.title) {
+            onTitleChange(meeting.id, newTitle.trim());
+        } else {
+            setNewTitle(meeting.title);
+        }
+        setIsEditingTitle(false);
     };
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            handleTimeSave();
-        } else if (e.key === 'Escape') {
+    const handleTimeKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') handleTimeSave();
+        else if (e.key === 'Escape') {
             setNewStartTime(meeting.startTime);
+            setNewEndTime(meeting.endTime);
             setIsEditingTime(false);
         }
     };
 
+    const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') handleTitleSave();
+        else if (e.key === 'Escape') {
+            setNewTitle(meeting.title);
+            setIsEditingTitle(false);
+        }
+    };
+
     const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+        e.dataTransfer.setData('source', 'calendar');
         e.dataTransfer.setData('meetingId', meeting.id);
     };
 
@@ -45,39 +97,81 @@ const CalendarMeetingCard: React.FC<{ meeting: Meeting, onTimeChange: (meetingId
             onDragStart={handleDragStart}
         >
             <div>
-                <p className="font-bold text-xs text-primary-800 truncate">{meeting.title}</p>
-                <div className="border-t pt-2 mt-2">
-                    {meeting.participantsInfo && meeting.participantsInfo.length > 0 ? (
-                        <ul className="space-y-2">
-                            {meeting.participantsInfo.map((p, index) => (
-                            <li key={index}>
-                                <p className="text-[11px] font-medium text-gray-800 truncate">{p.participantName}</p>
-                                <p className="text-[11px] text-gray-500">{p.projectsCount} {p.projectsCount > 1 ? 'projetos' : 'projeto'}</p>
-                            </li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <p className="text-xs text-center text-gray-600 py-2">
-                            {meeting.totalProjectsInMeeting} {meeting.totalProjectsInMeeting === 1 ? 'projeto' : 'projetos'} na pauta
-                        </p>
-                    )}
-                </div>
+                 {meeting.isCustom && isEditingTitle ? (
+                    <input
+                        type="text"
+                        value={newTitle}
+                        onChange={(e) => setNewTitle(e.target.value)}
+                        onBlur={handleTitleSave}
+                        onKeyDown={handleTitleKeyDown}
+                        className="font-bold text-xs text-primary-800 truncate w-full bg-primary-50 border border-primary-300 rounded px-1 py-0.5 outline-none"
+                        autoFocus
+                    />
+                ) : (
+                    <p 
+                        className={`font-bold text-xs text-primary-800 truncate ${meeting.isCustom ? 'cursor-pointer hover:bg-gray-100 rounded' : ''}`}
+                        onClick={() => meeting.isCustom && setIsEditingTitle(true)}
+                        title={meeting.isCustom ? "Clique para editar o título" : meeting.title}
+                    >
+                        {meeting.title}
+                    </p>
+                )}
+                { !meeting.isCustom && (
+                    <div className="border-t pt-2 mt-2">
+                        {meeting.participantsInfo && meeting.participantsInfo.length > 0 ? (
+                            <ul className="space-y-2">
+                                {meeting.participantsInfo.map((p, index) => (
+                                <li key={index}>
+                                    <p className="text-[11px] font-medium text-gray-800 truncate">{p.participantName}</p>
+                                    <p className="text-[11px] text-gray-500">{p.projectsCount} {p.projectsCount > 1 ? 'projetos' : 'projeto'}</p>
+                                </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p className="text-xs text-center text-gray-600 py-2">
+                                {meeting.totalProjectsInMeeting} {meeting.totalProjectsInMeeting === 1 ? 'projeto' : 'projetos'} na pauta
+                            </p>
+                        )}
+                    </div>
+                )}
             </div>
             <div 
-                className="mt-3 bg-gray-100 rounded-md py-1 px-2 flex items-center justify-center cursor-pointer"
-                onClick={() => setIsEditingTime(true)}
+                ref={timeEditContainerRef}
+                className={`mt-3 bg-gray-100 rounded-md py-1 px-2 flex items-center justify-center ${!isEditingTime ? 'cursor-pointer' : ''}`}
+                onClick={() => !isEditingTime && setIsEditingTime(true)}
+                title="Clique para editar o horário"
             >
                 <ClockIcon className="w-3 h-3 mr-1.5 text-gray-600" />
                 {isEditingTime ? (
-                    <input
-                        type="time"
-                        value={newStartTime}
-                        onChange={(e) => setNewStartTime(e.target.value)}
-                        onBlur={handleTimeSave}
-                        onKeyDown={handleKeyDown}
-                        className="text-[11px] font-semibold text-gray-700 bg-transparent w-full text-center outline-none"
-                        autoFocus
-                    />
+                    meeting.isCustom ? (
+                        <div className="flex items-center gap-1 w-full">
+                            <input
+                                type="time"
+                                value={newStartTime}
+                                onChange={(e) => setNewStartTime(e.target.value)}
+                                onKeyDown={handleTimeKeyDown}
+                                className="text-[11px] font-semibold text-gray-700 bg-transparent w-full text-center outline-none"
+                                autoFocus
+                            />
+                            <span className="text-[11px] font-semibold text-gray-700">-</span>
+                             <input
+                                type="time"
+                                value={newEndTime}
+                                onChange={(e) => setNewEndTime(e.target.value)}
+                                onKeyDown={handleTimeKeyDown}
+                                className="text-[11px] font-semibold text-gray-700 bg-transparent w-full text-center outline-none"
+                            />
+                        </div>
+                    ) : (
+                        <input
+                            type="time"
+                            value={newStartTime}
+                            onChange={(e) => setNewStartTime(e.target.value)}
+                            onKeyDown={handleTimeKeyDown}
+                            className="text-[11px] font-semibold text-gray-700 bg-transparent w-full text-center outline-none"
+                            autoFocus
+                        />
+                    )
                 ) : (
                     <span className="text-[11px] font-semibold text-gray-700">{meeting.startTime} - {meeting.endTime}</span>
                 )}
@@ -91,11 +185,13 @@ const weekDays: DayOfWeek[] = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta']
 interface WeekViewProps {
     meetings: Meeting[];
     weekStartDate: Date | null;
-    onMeetingDrop: (meetingId: string, newDate: string) => void;
+    onMeetingDrop: (dragData: { source: string; meetingId?: string }, newDate: string) => void;
     onTimeChange: (meetingId: string, newStartTime: string) => void;
+    onCustomTimeChange: (meetingId: string, newStartTime: string, newEndTime: string) => void;
+    onTitleChange: (meetingId: string, newTitle: string) => void;
 }
 
-const WeekView: React.FC<WeekViewProps> = ({ meetings, weekStartDate, onMeetingDrop, onTimeChange }) => {
+const WeekView: React.FC<WeekViewProps> = ({ meetings, weekStartDate, onMeetingDrop, onTimeChange, onCustomTimeChange, onTitleChange }) => {
   const meetingsByDay = useMemo(() => {
     const grouped: { [key in DayOfWeek]?: Meeting[] } = {};
     const sortedSchedule = [...meetings].sort((a, b) =>
@@ -124,15 +220,17 @@ const WeekView: React.FC<WeekViewProps> = ({ meetings, weekStartDate, onMeetingD
   const handleDrop = (e: React.DragEvent<HTMLDivElement>, day: DayOfWeek) => {
     e.preventDefault();
     if (!weekStartDate) return;
-
+    
+    const source = e.dataTransfer.getData('source');
     const meetingId = e.dataTransfer.getData('meetingId');
+
     const dayIndex = weekDays.indexOf(day);
     
     if (dayIndex !== -1) {
         const newDate = new Date(weekStartDate);
         newDate.setDate(weekStartDate.getDate() + dayIndex);
         const newDateString = newDate.toISOString().split('T')[0];
-        onMeetingDrop(meetingId, newDateString);
+        onMeetingDrop({ source, meetingId }, newDateString);
     }
   };
 
@@ -151,7 +249,7 @@ const WeekView: React.FC<WeekViewProps> = ({ meetings, weekStartDate, onMeetingD
             <div className="space-y-3 min-h-[10rem]">
               {(meetingsByDay[day] && meetingsByDay[day]!.length > 0) ? (
                 meetingsByDay[day]!.map(meeting => (
-                  <CalendarMeetingCard key={meeting.id} meeting={meeting} onTimeChange={onTimeChange} />
+                  <CalendarMeetingCard key={meeting.id} meeting={meeting} onTimeChange={onTimeChange} onCustomTimeChange={onCustomTimeChange} onTitleChange={onTitleChange} />
                 ))
               ) : (
                 <div className="flex items-center justify-center h-full text-center text-xs text-gray-400 pt-8">
@@ -167,7 +265,7 @@ const WeekView: React.FC<WeekViewProps> = ({ meetings, weekStartDate, onMeetingD
 };
 
 
-export const ScheduleDisplay: React.FC<ScheduleDisplayProps> = ({ schedule, isLoading, error, frequency, activeWeek, onMeetingDrop, onTimeChange }) => {
+export const ScheduleDisplay: React.FC<ScheduleDisplayProps> = ({ schedule, isLoading, error, frequency, activeWeek, onMeetingDrop, onTimeChange, onCustomTimeChange, onTitleChange, heldMeetings }) => {
   const { meetingsByWeek, weekStartDates } = useMemo(() => {
     if (!schedule || schedule.length === 0) {
       return { meetingsByWeek: {}, weekStartDates: {} };
@@ -231,7 +329,7 @@ export const ScheduleDisplay: React.FC<ScheduleDisplayProps> = ({ schedule, isLo
     );
   }
 
-  if (schedule.length === 0) {
+  if (schedule.length === 0 && heldMeetings.length === 0) {
     return (
       <div className="text-center py-16 px-6">
         <CalendarIcon className="mx-auto h-12 w-12 text-gray-400" />
@@ -252,6 +350,8 @@ export const ScheduleDisplay: React.FC<ScheduleDisplayProps> = ({ schedule, isLo
             weekStartDate={showTabs ? currentWeekStartDate : (weekStartDates[1] || null)}
             onMeetingDrop={onMeetingDrop}
             onTimeChange={onTimeChange}
+            onCustomTimeChange={onCustomTimeChange}
+            onTitleChange={onTitleChange}
         />
     </div>
   );

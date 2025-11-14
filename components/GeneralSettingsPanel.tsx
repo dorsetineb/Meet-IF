@@ -2,12 +2,13 @@
 import React, { useState, useMemo } from 'react';
 import type { GeneralSettings, DayOfWeek } from '../types';
 import { DiskIcon } from './icons/DiskIcon';
-import { CoffeeIcon } from './icons/CoffeeIcon';
 
 interface GeneralSettingsPanelProps {
   settings: GeneralSettings;
   setSettings: React.Dispatch<React.SetStateAction<GeneralSettings>>;
   onLunchSettingsClick: () => void;
+  onExportConfig: () => void;
+  onImportConfig: () => void;
 }
 
 const ALL_DAYS: DayOfWeek[] = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
@@ -28,7 +29,7 @@ const InputField = ({ id, label, type, value, onChange, min, step }: { id: strin
   </div>
 );
 
-export const GeneralSettingsPanel: React.FC<GeneralSettingsPanelProps> = ({ settings, setSettings, onLunchSettingsClick }) => {
+export const GeneralSettingsPanel: React.FC<GeneralSettingsPanelProps> = ({ settings, setSettings, onLunchSettingsClick, onExportConfig, onImportConfig }) => {
     const [savedSettings, setSavedSettings] = useState<GeneralSettings>(settings);
 
     const isDirty = useMemo(() => {
@@ -58,20 +59,36 @@ export const GeneralSettingsPanel: React.FC<GeneralSettingsPanelProps> = ({ sett
 
     return (
         <div className="bg-white p-6 md:p-8 rounded-xl">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
                 <h2 className="text-xl font-bold text-gray-800">Configurações da agenda</h2>
-                <button 
-                    onClick={handleSave}
-                    disabled={!isDirty}
-                    className={`p-2 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 ${
-                        isDirty 
-                        ? 'text-white bg-primary-600 hover:bg-primary-700' 
-                        : 'text-gray-500 bg-gray-300 cursor-not-allowed'
-                    }`}
-                    aria-label="Salvar configurações"
-                >
-                    <DiskIcon className="w-5 h-5" />
-                </button>
+                <div className="flex items-center gap-2 self-end sm:self-center">
+                    <button 
+                        onClick={onImportConfig}
+                        className="px-3 py-2 text-xs font-medium text-gray-700 bg-gray-100 border border-transparent rounded-md hover:bg-gray-200 transition-colors"
+                        aria-label="Importar arquivo de configurações (.json)"
+                    >
+                        Importar Configs
+                    </button>
+                    <button 
+                        onClick={onExportConfig}
+                        className="px-3 py-2 text-xs font-medium text-gray-700 bg-gray-100 border border-transparent rounded-md hover:bg-gray-200 transition-colors"
+                        aria-label="Exportar arquivo de configurações (.json)"
+                    >
+                        Exportar Configs
+                    </button>
+                    <button 
+                        onClick={handleSave}
+                        disabled={!isDirty}
+                        className={`p-2 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 ${
+                            isDirty 
+                            ? 'text-white bg-primary-600 hover:bg-primary-700' 
+                            : 'text-gray-500 bg-gray-300 cursor-not-allowed'
+                        }`}
+                        aria-label="Salvar configurações"
+                    >
+                        <DiskIcon className="w-5 h-5" />
+                    </button>
+                </div>
             </div>
             <div className="space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 items-end">
